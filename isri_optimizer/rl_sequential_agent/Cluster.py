@@ -36,8 +36,9 @@ plt.show()
 
 pd.plotting.scatter_matrix(df_cluster, alpha=0.2, c=kmeans.labels_.astype(float), figsize=(15,15))
 plt.show()
-
-
+# Matplotlib toolkits
+# PCA
+# Agglomeratives Clustern
 
 
 
