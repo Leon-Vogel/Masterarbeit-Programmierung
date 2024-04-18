@@ -42,6 +42,7 @@ plt.show()
 
 
 
+
 '''plt.scatter(df_cluster['time1'], df_cluster['time5'], c=kmeans.labels_.astype(float), s=50, alpha=0.5)
 plt.scatter(centroids[:, 0], centroids[:, 1], c='red', s=50)
 plt.show()'''
