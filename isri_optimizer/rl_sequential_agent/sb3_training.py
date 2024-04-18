@@ -47,6 +47,7 @@ ppo_config = {
     'learning_rate': 0.005,
     'n_steps': 2048,
     'gamma': 0.9999,
+    'ent_coef': 0.01,
     'tensorboard_log': MODEL_SAVE_DIR,
     'stats_window_size': 2048,
     'verbose': True,
