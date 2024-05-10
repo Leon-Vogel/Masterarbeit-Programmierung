@@ -21,14 +21,14 @@ class cluster_kmeans():
             with open(path+"kmeans_model_n"+str(n_cluster)+".pkl", "rb") as f:
                 self.kmeans = pickle.load(f)
         else:
-            GA_SOLUTIONS_PATH = "isri_optimizer/rl_sequential_agent/IsriDataDict.pkl"
+            GA_SOLUTIONS_PATH = "isri_optimizer/rl_sequential_agent/IsriDataset.pkl"
 
             isri_dataset = pickle.load(open(GA_SOLUTIONS_PATH, 'rb'))
 
             df = pd.DataFrame()
 
-            for i in range(len(isri_dataset['Jobdata'])):
-                df_temp = pd.DataFrame.from_dict(isri_dataset['Jobdata'][i], orient='index')
+            for i in range(len(isri_dataset.data['Jobdata'])):
+                df_temp = pd.DataFrame.from_dict(isri_dataset.data['Jobdata'][i], orient='index')
                 df = pd.concat([df, df_temp])
 
             df[['time1','time2','time3','time4','time5','time6','time7','time8','time9','time10','time11','time12']] = pd.DataFrame(df.times.tolist(), index= df.index)

@@ -31,7 +31,7 @@ class CustomCallback(BaseCallback):
         # self.parent = None  # type: Optional[BaseCallback]
         self.workload_hist = deque(maxlen=100)
         self.deadline_hist = deque(maxlen=100)
-        self.balance_punishement_hist = deque(maxlen=100)
+        #self.balance_punishement_hist = deque(maxlen=100)
 
     def _on_training_start(self) -> None:
         """
@@ -56,16 +56,25 @@ class CustomCallback(BaseCallback):
 
         :return: If the callback returns False, training is aborted early.
         """
+        if self.n_calls == 1:
+            self.deadline_r_hist = deque(maxlen=self.locals['n_rollout_steps'])
+            self.diffsum_r_hist = deque(maxlen=self.locals['n_rollout_steps'])
+        
         dones = self.locals['dones']
         for idx in range(dones.shape[0]):
+            self.deadline_r_hist.append(self.locals['env'].envs[idx].deadline_r)
+            self.diffsum_r_hist.append(self.locals['env'].envs[idx].diffsum_r)
             if dones[idx]:
                 env = self.locals['env'].envs[idx].env
                 self.deadline_hist.append(env.deadline_gap)
                 self.workload_hist.append(env.workload_gap)
-                self.balance_punishement_hist.append(env.balance_punishement)
+
+                #self.balance_punishement_hist.append(env.balance_punishement)
                 self.logger.record('deadline_gap', np.mean(self.deadline_hist))
                 self.logger.record('workload_gap', np.mean(self.workload_hist))
-                self.logger.record('balance_punishement', np.mean(self.balance_punishement_hist))
+                self.logger.record('deadline_reward', np.mean(self.deadline_r_hist))
+                self.logger.record('diffsum_reward', np.mean(self.diffsum_r_hist))
+                #self.logger.record('balance_punishement', np.mean(self.balance_punishement_hist))
 
         return True
 

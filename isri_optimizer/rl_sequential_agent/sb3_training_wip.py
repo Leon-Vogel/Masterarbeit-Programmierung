@@ -39,9 +39,9 @@ env_config = {
     "last_n": 2,
     "input_features": 13,  # Example number of features per job
     "obs_space": 'simple', # simple, full, small
-    "diffsum_weight": 1.0, #diffsum im tausender Bereich
+    "diffsum_weight": 0.0, #diffsum im tausender Bereich
     "DIFFSUM_NORM": 1.0,
-    "tardiness_weight": 2.0, 
+    "tardiness_weight": 1.0, 
     "TARDINESS_NORM": 1.0,
     "pca": None,
     "n_classes": 8, # Muss mit Kmeans übereinstimmen
@@ -50,10 +50,10 @@ env_config = {
 
 ppo_config = {
     'policy': 'MlpPolicy',
-    'learning_rate': 0.005,
+    'learning_rate': 0.004,
     'n_steps': 2048,
     'gamma': 0.9999,
-    'ent_coef': 0.01,
+    'ent_coef': 0.0,
     'tensorboard_log': MODEL_SAVE_DIR,
     'stats_window_size': 2048,
     'verbose': True,

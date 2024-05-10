@@ -35,6 +35,8 @@ class IsriEnv(gym.Env):
         self.obs_type = env_config['obs_space']
         self.deadline_gap = 0
         self.workload_gap = 0
+        self.deadline_r = 0
+        self.diffsum_r = 0
         self.balance_punishement = 0
         self.jobclasses = {idx: [] for idx in range(self.n_classes)}
         if self.cluster_method == "kmeans":
@@ -141,7 +143,7 @@ class IsriEnv(gym.Env):
             tardiness_difference = (self.curr_target_values[1] - tardiness) / self.curr_target_values[1]
             # balance_reward = np.abs(diffsum_difference - tardiness_difference) # Belohnen wenn Ziele im selben Maß erreicht werden
             balance_reward = 0
-            self.workload_gap = diffsum_difference            #Dokumentation Vergleich zu GA
+            self.workload_gap = diffsum_difference            
             self.deadline_gap = tardiness_difference
             self.balance_punishement = balance_reward
             return (diffsum_difference + tardiness_difference - balance_reward) * 100
@@ -159,6 +161,18 @@ class IsriEnv(gym.Env):
             last_job_deadline = self.jobdata[self.genome[-1]]['due_date']
             current_finish_time = (self.steps + self.n_machines) * self.conv_speed
             tardiness = -np.exp((current_finish_time - last_job_deadline) / 3600) # 3600 Sekunden = 1 Stunde
+
+            self.deadline_r = tardiness
+            self.diffsum_r = diffsum
+            if self.steps == len(self.jobdata):
+                diffsum_temp, tardiness_temp = fast_sim_diffsum(np.array(self.genome), jobs=self.jobdata, jpl=self.jpl,
+                                                  conv_speed=self.conv_speed, n_machines=self.n_machines)
+                diffsum_difference = (diffsum_temp - self.curr_target_values[0]) / self.curr_target_values[0]
+                tardiness_difference = (self.curr_target_values[1] - tardiness_temp) / self.curr_target_values[1]
+                # balance_reward = np.abs(diffsum_difference - tardiness_difference) # Belohnen wenn Ziele im selben Maß erreicht werden
+                balance_reward = 0
+                self.workload_gap = diffsum_difference            
+                self.deadline_gap = tardiness_difference
             return diffsum * self.diffsum_weight + tardiness * self.tardiness_weight
         else:
             return 0
