@@ -43,7 +43,7 @@ env_config = {
     "tardiness_weight": 2.0, 
     "pca": None,
     "n_classes": 6, # Muss mit Kmeans übereinstimmen
-    "cluster": ?? #kmeans model übergeben
+    "cluster_method": "kmeans" #kmeans model übergeben
 }
 
 ppo_config = {
