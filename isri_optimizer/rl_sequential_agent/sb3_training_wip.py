@@ -15,7 +15,7 @@ MODEL_SAVE_DIR = f"./isri_optimizer/rl_sequential_agent/savefiles/{SAVE_NAME}"
 JOBDATA_DIR = './isri_optimizer/instances/'
 SAVEFILE = f"./isri_optimizer/rl_sequential_agent/savefiles/{SAVE_NAME}_best_chromosome"
 N_TRAINING_INSTANCES = 1
-GA_SOLUTIONS_PATH = "./isri_optimizer/rl_sequential_agent/IsriDataset.pkl"
+GA_SOLUTIONS_PATH = "./isri_optimizer/rl_sequential_agent/IsriDataset.pkl" #ToDo: Muss diese Datei auch aktualisiert werden?
 N_TRIES = 10
 
 # Loading instances and creating config
@@ -40,9 +40,11 @@ env_config = {
     "input_features": 13,  # Example number of features per job
     "obs_space": 'simple', # simple, full, small
     "diffsum_weight": 1.0, #diffsum im tausender Bereich
+    "DIFFSUM_NORM": 1.0,
     "tardiness_weight": 2.0, 
+    "TARDINESS_NORM": 1.0,
     "pca": None,
-    "n_classes": 6, # Muss mit Kmeans übereinstimmen
+    "n_classes": 8, # Muss mit Kmeans übereinstimmen
     "cluster_method": "kmeans" #kmeans model übergeben
 }
 
