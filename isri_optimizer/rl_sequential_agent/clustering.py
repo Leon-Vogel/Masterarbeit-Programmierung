@@ -67,7 +67,7 @@ class cluster_neighbour():
     def __init__(self, n_cluster, path="isri_optimizer/rl_sequential_agent/cluster_models/"):
         if os.path.exists(path+"knn_model_n"+str(n_cluster)+".pkl"):
             with open(path+"knn_model_n"+str(n_cluster)+".pkl", "rb") as f:
-                self.kmeans = pickle.load(f)
+                self.knn_model = pickle.load(f)
         else:
             GA_SOLUTIONS_PATH = "isri_optimizer/rl_sequential_agent/IsriDataDict.pkl"
 

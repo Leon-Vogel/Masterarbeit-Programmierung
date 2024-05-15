@@ -7,7 +7,7 @@ from misc_utils.copy_helper import fast_deepcopy
 import random
 import matplotlib.pyplot as plt
 from scipy.spatial.distance import cdist, pdist
-from clustering import cluster_kmeans
+from clustering import cluster_kmeans, cluster_neighbour
 
 
 def map_to_rgb(array: np.ndarray):
@@ -41,6 +41,8 @@ class IsriEnv(gym.Env):
         self.jobclasses = {idx: [] for idx in range(self.n_classes)}
         if self.cluster_method == "kmeans":
             self.cluster = cluster_kmeans(self.n_classes)
+        if self.cluster_method == "neighbour":
+            self.cluster = cluster_neighbour(self.n_classes)
         
 
 
