@@ -9,8 +9,8 @@ from stable_baselines3.dqn import DQN
 from sklearn.cluster import KMeans
 
 SAVE_NAME = "single_instance" #Logname
-SAVE_FREQUENCY = 10_000
-TOTAL_TRAINING_STEPS = 20_000
+SAVE_FREQUENCY = 100_000
+TOTAL_TRAINING_STEPS = 600_000
 MODEL_SAVE_DIR = f"./isri_optimizer/rl_sequential_agent/savefiles/{SAVE_NAME}"
 JOBDATA_DIR = './isri_optimizer/instances/'
 SAVEFILE = f"./isri_optimizer/rl_sequential_agent/savefiles/{SAVE_NAME}_best_chromosome"
@@ -26,7 +26,125 @@ isri_dataset.data['GAChromosome'] = isri_dataset.data['GAChromosome'][:N_TRAININ
 isri_dataset.data['GAFitness'] = isri_dataset.data['GAFitness'][:N_TRAINING_INSTANCES]
 
 
-env_config_kmeans = {
+env_config_kmeans_n8 = {
+    "jpl": 20,  # Example values, please adjust according to your needs
+    "conv_speed": 208,
+    "n_machines": 12,
+    "n_lines": 1,
+    "window_size": 4,
+    "isri_dataset": isri_dataset,
+    "next_n": 15,
+    "last_n": 2,
+    "input_features": 13,  # Example number of features per job
+    "obs_space": 'simple', # simple, full, small
+    "diffsum_weight": 1.0, #diffsum im tausender Bereich
+    "DIFFSUM_NORM": 1.0,
+    "tardiness_weight": 1.0, 
+    "TARDINESS_NORM": 1.0,
+    "pca": None,
+    "n_classes": 8, # Muss mit Kmeans übereinstimmen
+    "cluster_method": "kmeans" #kmeans model übergeben
+}
+env_config_kmeans_n12 = {
+    "jpl": 20,  # Example values, please adjust according to your needs
+    "conv_speed": 208,
+    "n_machines": 12,
+    "n_lines": 1,
+    "window_size": 4,
+    "isri_dataset": isri_dataset,
+    "next_n": 15,
+    "last_n": 2,
+    "input_features": 13,  # Example number of features per job
+    "obs_space": 'simple', # simple, full, small
+    "diffsum_weight": 1.0, #diffsum im tausender Bereich
+    "DIFFSUM_NORM": 1.0,
+    "tardiness_weight": 1.0, 
+    "TARDINESS_NORM": 1.0,
+    "pca": None,
+    "n_classes": 12, # Muss mit Kmeans übereinstimmen
+    "cluster_method": "kmeans" #kmeans model übergeben
+}
+env_config_kmeans_n15 = {
+    "jpl": 20,  # Example values, please adjust according to your needs
+    "conv_speed": 208,
+    "n_machines": 12,
+    "n_lines": 1,
+    "window_size": 4,
+    "isri_dataset": isri_dataset,
+    "next_n": 15,
+    "last_n": 2,
+    "input_features": 13,  # Example number of features per job
+    "obs_space": 'simple', # simple, full, small
+    "diffsum_weight": 1.0, #diffsum im tausender Bereich
+    "DIFFSUM_NORM": 1.0,
+    "tardiness_weight": 1.0, 
+    "TARDINESS_NORM": 1.0,
+    "pca": None,
+    "n_classes": 15, # Muss mit Kmeans übereinstimmen
+    "cluster_method": "kmeans" #kmeans model übergeben
+}
+
+env_config_neighbour_n8 = {
+    "jpl": 20,  # Example values, please adjust according to your needs
+    "conv_speed": 208,
+    "n_machines": 12,
+    "n_lines": 1,
+    "window_size": 4,
+    "isri_dataset": isri_dataset,
+    "next_n": 15,
+    "last_n": 2,
+    "input_features": 13,  # Example number of features per job
+    "obs_space": 'simple', # simple, full, small
+    "diffsum_weight": 1.0, #diffsum im tausender Bereich
+    "DIFFSUM_NORM": 1.0,
+    "tardiness_weight": 1.0, 
+    "TARDINESS_NORM": 1.0,
+    "pca": None,
+    "n_classes": 8, # Muss mit Kmeans übereinstimmen
+    "cluster_method": "neighbour" #kmeans model übergeben
+}
+env_config_neighbour_n12 = {
+    "jpl": 20,  # Example values, please adjust according to your needs
+    "conv_speed": 208,
+    "n_machines": 12,
+    "n_lines": 1,
+    "window_size": 4,
+    "isri_dataset": isri_dataset,
+    "next_n": 15,
+    "last_n": 2,
+    "input_features": 13,  # Example number of features per job
+    "obs_space": 'simple', # simple, full, small
+    "diffsum_weight": 1.0, #diffsum im tausender Bereich
+    "DIFFSUM_NORM": 1.0,
+    "tardiness_weight": 1.0, 
+    "TARDINESS_NORM": 1.0,
+    "pca": None,
+    "n_classes": 12, # Muss mit Kmeans übereinstimmen
+    "cluster_method": "neighbour" #kmeans model übergeben
+}
+env_config_neighbour_n15 = {
+    "jpl": 20,  # Example values, please adjust according to your needs
+    "conv_speed": 208,
+    "n_machines": 12,
+    "n_lines": 1,
+    "window_size": 4,
+    "isri_dataset": isri_dataset,
+    "next_n": 15,
+    "last_n": 2,
+    "input_features": 13,  # Example number of features per job
+    "obs_space": 'simple', # simple, full, small
+    "diffsum_weight": 1.0, #diffsum im tausender Bereich
+    "DIFFSUM_NORM": 1.0,
+    "tardiness_weight": 1.0, 
+    "TARDINESS_NORM": 1.0,
+    "pca": None,
+    "n_classes": 15, # Muss mit Kmeans übereinstimmen
+    "cluster_method": "neighbour" #kmeans model übergeben
+}
+
+
+
+env_config_kmeans_n8_tard = {
     "jpl": 20,  # Example values, please adjust according to your needs
     "conv_speed": 208,
     "n_machines": 12,
@@ -45,8 +163,46 @@ env_config_kmeans = {
     "n_classes": 8, # Muss mit Kmeans übereinstimmen
     "cluster_method": "kmeans" #kmeans model übergeben
 }
+env_config_kmeans_n12_tard = {
+    "jpl": 20,  # Example values, please adjust according to your needs
+    "conv_speed": 208,
+    "n_machines": 12,
+    "n_lines": 1,
+    "window_size": 4,
+    "isri_dataset": isri_dataset,
+    "next_n": 15,
+    "last_n": 2,
+    "input_features": 13,  # Example number of features per job
+    "obs_space": 'simple', # simple, full, small
+    "diffsum_weight": 0.0, #diffsum im tausender Bereich
+    "DIFFSUM_NORM": 1.0,
+    "tardiness_weight": 1.0, 
+    "TARDINESS_NORM": 1.0,
+    "pca": None,
+    "n_classes": 12, # Muss mit Kmeans übereinstimmen
+    "cluster_method": "kmeans" #kmeans model übergeben
+}
+env_config_kmeans_n15_tard = {
+    "jpl": 20,  # Example values, please adjust according to your needs
+    "conv_speed": 208,
+    "n_machines": 12,
+    "n_lines": 1,
+    "window_size": 4,
+    "isri_dataset": isri_dataset,
+    "next_n": 15,
+    "last_n": 2,
+    "input_features": 13,  # Example number of features per job
+    "obs_space": 'simple', # simple, full, small
+    "diffsum_weight": 0.0, #diffsum im tausender Bereich
+    "DIFFSUM_NORM": 1.0,
+    "tardiness_weight": 1.0, 
+    "TARDINESS_NORM": 1.0,
+    "pca": None,
+    "n_classes": 15, # Muss mit Kmeans übereinstimmen
+    "cluster_method": "kmeans" #kmeans model übergeben
+}
 
-env_config_neighbour = {
+env_config_neighbour_n8_tard = {
     "jpl": 20,  # Example values, please adjust according to your needs
     "conv_speed": 208,
     "n_machines": 12,
@@ -65,6 +221,44 @@ env_config_neighbour = {
     "n_classes": 8, # Muss mit Kmeans übereinstimmen
     "cluster_method": "neighbour" #kmeans model übergeben
 }
+env_config_neighbour_n12_tard = {
+    "jpl": 20,  # Example values, please adjust according to your needs
+    "conv_speed": 208,
+    "n_machines": 12,
+    "n_lines": 1,
+    "window_size": 4,
+    "isri_dataset": isri_dataset,
+    "next_n": 15,
+    "last_n": 2,
+    "input_features": 13,  # Example number of features per job
+    "obs_space": 'simple', # simple, full, small
+    "diffsum_weight": 0.0, #diffsum im tausender Bereich
+    "DIFFSUM_NORM": 1.0,
+    "tardiness_weight": 1.0, 
+    "TARDINESS_NORM": 1.0,
+    "pca": None,
+    "n_classes": 12, # Muss mit Kmeans übereinstimmen
+    "cluster_method": "neighbour" #kmeans model übergeben
+}
+env_config_neighbour_n15_tard = {
+    "jpl": 20,  # Example values, please adjust according to your needs
+    "conv_speed": 208,
+    "n_machines": 12,
+    "n_lines": 1,
+    "window_size": 4,
+    "isri_dataset": isri_dataset,
+    "next_n": 15,
+    "last_n": 2,
+    "input_features": 13,  # Example number of features per job
+    "obs_space": 'simple', # simple, full, small
+    "diffsum_weight": 0.0, #diffsum im tausender Bereich
+    "DIFFSUM_NORM": 1.0,
+    "tardiness_weight": 1.0, 
+    "TARDINESS_NORM": 1.0,
+    "pca": None,
+    "n_classes": 15, # Muss mit Kmeans übereinstimmen
+    "cluster_method": "neighbour" #kmeans model übergeben
+}
 
 ppo_config = {
     'policy': 'MlpPolicy',
@@ -80,7 +274,12 @@ ppo_config = {
 
 
 
-config_dict = {'kmeans': env_config_kmeans, 'neighbour':env_config_neighbour} # die Namen der items werden für savefile namen benutzt
+config_dict = {'kmeans_n8': env_config_kmeans_n8, 'kmeans_n12': env_config_kmeans_n12, 'kmeans_n15': env_config_kmeans_n15, 
+               'neighbour_n8':env_config_neighbour_n8, 'neighbour_n12':env_config_neighbour_n12, 'neighbour_n15':env_config_neighbour_n15, 
+               'kmeans_n8_tard': env_config_kmeans_n8_tard, 'kmeans_n12_tard': env_config_kmeans_n12_tard, 
+               'kmeans_n15_tard': env_config_kmeans_n15_tard, 
+               'neighbour_n8_tard':env_config_neighbour_n8_tard, 'neighbour_n12_tard':env_config_neighbour_n12_tard, 
+               'neighbour_n15_tard':env_config_neighbour_n15_tard} # die Namen der items werden für savefile namen benutzt
 if __name__ == '__main__':
     # import cProfile, pstats
     # profiler = cProfile.Profile()    
