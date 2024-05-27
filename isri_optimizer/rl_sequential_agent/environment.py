@@ -74,8 +74,14 @@ class IsriEnv(gym.Env):
 
     def step(self, action: int):
         self._add_job_to_genome(action)
+        #self._add_job_to_genome_heurist(action)
         # print(f"self.genome: {self.genome}")
-        reward = self._get_reward_dense()
+        #reward = self._get_reward_dense()
+        #if self.steps == len(self.jobdata) - 1:
+        #    reward = self._get_reward_sparse()
+        #else:
+        #    reward = self._get_reward_dense()
+        reward = self._get_reward_sparse()
         obs = self.make_obs()
         terminated = False
         # info = self._get_info()
@@ -129,6 +135,8 @@ class IsriEnv(gym.Env):
         self.pca = env_config['pca']
         self.n_classes = env_config['n_classes']
         self.cluster_method = env_config['cluster_method']
+        self.use_heuristic = True
+        self.reward_type = env_config['reward_type']
 
     def _project_fitnessscores_to_reward(self, diffsum: float, tardiness: float):
         # Wir wollen diffsum_weight maximieren und tardiness minimieren
@@ -136,6 +144,14 @@ class IsriEnv(gym.Env):
         tardiness_reward = -tardiness * self.TARDINESS_NORM * self.TARDINESS_WEIGHT
         r = diffsum_reward + tardiness_reward
         return r
+
+    def _get_reard(self):
+        if self.reward_type == 'sparse':
+            return self._get_reward_sparse()
+        elif self.obs_type == 'dense':
+            return self._get_reward_dense()
+        elif self.obs_type == 'combined':
+            return self._get_reward_dense()+self._get_reward_sparse()
 
     def _get_reward_sparse(self):
         if self.steps == len(self.jobdata) - 1:
@@ -148,6 +164,7 @@ class IsriEnv(gym.Env):
             self.workload_gap = diffsum_difference            
             self.deadline_gap = tardiness_difference
             self.balance_punishement = balance_reward
+            #return (diffsum_difference + tardiness_difference - balance_reward) * 100
             return (diffsum_difference + tardiness_difference - balance_reward) * 100
         else:
             return -self.invalid_action_penalty
@@ -187,6 +204,36 @@ class IsriEnv(gym.Env):
         self.unplanned_jobs_sorted.remove(selected_job)
         self.genome.append(selected_job)
         self.steps += 1
+
+    def _add_job_to_genome_heurist(self, action):
+        try:
+            selected_job = self.jobclasses[action].pop(0)
+            self.unplanned_jobs_sorted.remove(selected_job)
+            self.invalid_action_penalty = 0
+        except IndexError:
+            selected_job = self.unplanned_jobs_sorted.pop(len(self.unplanned_jobs_sorted) - 1) # Falls ungültige Aktion -> nimm den letzten
+            self.invalid_action_penalty = 10
+        self._update_genome(selected_job)
+        self.steps += 1
+
+    def _update_genome(self, job):
+        if self.last_n > len(self.genome):
+            options = list(range(len(self.genome) + 1))
+        else:
+            options = list(range(len(self.genome) - self.last_n, len(self.genome) + 1))
+        
+        if self.use_heuristic:
+            # Platziere den Job an der Stelle mit maximaler Workload difference innerhalb der last_n Stellen
+            results = []
+            for option in options:
+                new_ind = fast_deepcopy(self.genome)
+                new_ind.insert(option, job)
+                new_ind = np.array(new_ind)
+                diffsum, tardiness = fast_sim_diffsum(new_ind, self.jobdata, self.jpl, self.conv_speed,
+                                                    self.n_machines, n_lines=1, window_size=self.window_size)
+                results.append(diffsum)
+            best_diffsum = np.argmin(results)
+            self.genome.insert(options[best_diffsum], job)
 
     def action_masks(self):
         return np.array([len(self.jobclasses[idx]) > 0 for idx in range(self.n_classes)])
@@ -294,9 +341,11 @@ class IsriEnv(gym.Env):
             if len(class_products) > 0:
                 next_product = class_products[0]
                 next_deadline = self.jobdata[next_product]['due_date']
+                next_deadline = (next_deadline - self.conv_speed * self.steps) / self.conv_speed
                 next_times = self.jobdata[next_product]['times']
-                amount = len(class_products)
+                amount = len(class_products)/len(self.jobdata)
                 row = np.array([next_deadline, amount] + next_times) #concat?
+                row[2:] = row[2:]/self.conv_speed
                 obs[cls, :] = row
         
         # Extract times for the last self.last_n entries of planned_jobs
@@ -306,7 +355,9 @@ class IsriEnv(gym.Env):
             last_n_times = np.array([self.jobdata[job]['times']+[self.jobdata[job]['due_date']] for job in self.genome[-size_last_n:]])
             last_n_array[-size_last_n:, :] = last_n_times
 
-        last_n_array[-size_last_n:, :] /= self.conv_speed
+        # last_n_array[-size_last_n:, :-1] /= self.conv_speed #Normalisierung mit conveyer speed
+
+        last_n_array[:, -1] = (last_n_array[:, -1] - self.conv_speed * self.steps) / self.conv_speed
 
         progress = np.array(self.steps / len(self.jobdata)).reshape([1,])
 
