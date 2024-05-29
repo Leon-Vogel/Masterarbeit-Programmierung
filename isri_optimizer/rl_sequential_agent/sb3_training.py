@@ -14,9 +14,9 @@ from typing import Callable
 
 SAVE_FREQUENCY = 100_000
 TOTAL_TRAINING_STEPS = 1000_000
-MODEL_SAVE_DIR = f"./isri_optimizer/rl_sequential_agent/savefiles_0529/"
+MODEL_SAVE_DIR = f"./isri_optimizer/rl_sequential_agent/savefiles_0530/"
 JOBDATA_DIR = './isri_optimizer/instances/'
-SAVEFILE = f"./isri_optimizer/rl_sequential_agent/savefiles_0529/_best_chromosome"
+SAVEFILE = f"./isri_optimizer/rl_sequential_agent/savefiles_0530/_best_chromosome"
 N_TRAINING_INSTANCES = 500
 GA_SOLUTIONS_PATH = "./isri_optimizer/rl_sequential_agent/IsriDataset.pkl" #ToDo: Muss diese Datei auch aktualisiert werden?
 N_TRIES = 1
@@ -58,10 +58,10 @@ env_config = {
 }
 
 env_config_variants = {
-    "last_n": [3],
-    "reward_type": ["sparse", "dense"], #sparse dense combined sparse_sum
-    "n_classes": [10], # Muss mit Kmeans übereinstimmen
-    "cluster_method": ["kmeans"] #kmeans model übergeben
+    "last_n": [20],
+    "reward_type": ["sparse"], #sparse dense combined sparse_sum
+    "n_classes": [8, 10, 12], # Muss mit Kmeans übereinstimmen
+    "cluster_method": ["neighbour", "kmeans"] #kmeans model übergeben
 }
 
 
@@ -81,7 +81,7 @@ ppo_config = {
     'n_steps': 1024, #1024, #The number of steps to run for each environment per update 
     'batch_size': 128, #Minibatch size
     'n_epochs': 10, #Number of epoch when optimizing the surrogate loss
-    'gamma': 0.9999, #Discount factor
+    'gamma': 0.99, #Discount factor
     'gae_lambda': 0.95, # gae_lambda: float = 0.95
     'ent_coef': 0.01, #Entropy coefficient for the loss calculation
     'clip_range': 0.2, #Clipping parameter
@@ -104,11 +104,11 @@ if __name__ == '__main__':
             ppo_config['env'] = env
             #dqn_config['env'] = env
             #save_callback = CheckpointCallback(save_freq=SAVE_FREQUENCY, save_path=MODEL_SAVE_DIR + f"/_{name}")
-            callback = CustomCallback(path=f'{MODEL_SAVE_DIR}_{name}' + f'/{name}_best_model')
+            callback = CustomCallback(path=f'{MODEL_SAVE_DIR}_{name}' + f'/{name}_gamma099_best_model')
             model = MaskablePPO(**ppo_config, learning_rate=linear_schedule(0.0005) ,tensorboard_log=f'{MODEL_SAVE_DIR}_{name}') #, ent_coef=linear_schedule(0.001)
             # model = DQN(**dqn_config)
             # logname = f"Training_multiple_instances_gamma_{ppo_config['gamma']}_lr_{ppo_config['learning_rate']}_clip_range_{ppo_config['clip_range']}"
-            model.learn(TOTAL_TRAINING_STEPS, tb_log_name=f'{name}', callback=callback)
+            model.learn(TOTAL_TRAINING_STEPS, tb_log_name=f'{name}_gamma099', callback=callback)
             # model.learn(TOTAL_TRAINING_STEPS, callback=callback)
             # profiler.disable()
             

@@ -79,7 +79,7 @@ class IsriEnv(gym.Env):
     def step(self, action: int):
         self._add_job_to_genome(action)
         #self.log_to_file(LOGPATH, str(action))
-        # self._add_job_to_genome_heurist(action)
+        #self._add_job_to_genome_heurist(action)
         # print(f"self.genome: {self.genome}")
         reward = self._get_reward()
         obs = self.make_obs()
@@ -222,10 +222,10 @@ class IsriEnv(gym.Env):
             current_finish_time = (self.steps + self.n_machines) * self.conv_speed
             #tardiness = -np.exp((current_finish_time - last_job_deadline) / 3600) # 3600 Sekunden = 1 Stunde
             tardiness = ((current_finish_time - last_job_deadline) / 3600) # 3600 Sekunden = 1 Stunde
-            #if tardiness > 0:
-            #    tardiness = -tardiness
-            #else:
-            tardiness = -tardiness
+            if tardiness > 0:
+                tardiness = -tardiness
+            else:
+                tardiness = 0# -tardiness*0.1
 
             self.deadline_r = tardiness * self.tardiness_weight
             self.diffsum_r = diffsum * self.diffsum_weight
