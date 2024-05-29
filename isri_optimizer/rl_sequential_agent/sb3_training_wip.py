@@ -7,10 +7,11 @@ from stable_baselines3.common.callbacks import CheckpointCallback
 from isri_optimizer.rl_sequential_agent.custom_callback import CustomCallback
 from stable_baselines3.dqn import DQN
 from sklearn.cluster import KMeans
+import torch as T
 
 SAVE_NAME = "simple_obs_sparse_reward_single_instance_dqn" #Logname
 SAVE_FREQUENCY = 100_000
-TOTAL_TRAINING_STEPS = 250_000
+TOTAL_TRAINING_STEPS = 500_000
 MODEL_SAVE_DIR = f"./isri_optimizer/rl_sequential_agent/savefiles/{SAVE_NAME}"
 JOBDATA_DIR = './isri_optimizer/instances/'
 SAVEFILE = f"./isri_optimizer/rl_sequential_agent/savefiles/{SAVE_NAME}_best_chromosome"
@@ -39,7 +40,7 @@ env_config = {
     "last_n": 2,
     "input_features": 13,  # Example number of features per job
     "obs_space": 'simple', # simple, full, small
-    "diffsum_weight": 0.0, #diffsum im tausender Bereich
+    "diffsum_weight": 0.5, #diffsum im tausender Bereich
     "DIFFSUM_NORM": 1.0,
     "tardiness_weight": 1.0, 
     "TARDINESS_NORM": 1.0,
@@ -50,14 +51,20 @@ env_config = {
 
 ppo_config = {
     'policy': 'MlpPolicy',
-    'learning_rate': 0.004,
+    'learning_rate': 0.003,
     'n_steps': 2048,
-    'gamma': 0.9999,
+    'gamma': 0.99, #0.9999
     'ent_coef': 0.0,
     'tensorboard_log': MODEL_SAVE_DIR,
     'stats_window_size': 2048,
     'verbose': True,
-    "policy_kwargs": dict(net_arch=dict(pi=[256, 128, 64], vf=[256, 128, 64]))
+    "policy_kwargs": dict(net_arch=dict(pi=[256, 128, 64], vf=[256, 128, 64])),
+    'clip_range': 0.2,
+    'device': T.device('cuda:0' if T.cuda.is_available() else 'cpu')
+    #clip range 0.2
+    #batch size 128
+    #nepochs 10 'n_epochs': 10
+    #clip range vf
 }
 
 dqn_config = {
