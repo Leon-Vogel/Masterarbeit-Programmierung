@@ -8,7 +8,7 @@ class CustomCallback(BaseCallback):
 
     :param verbose: Verbosity level: 0 for no output, 1 for info messages, 2 for debug messages
     """
-    def __init__(self, verbose: int = 0):
+    def __init__(self, verbose: int = 0, path = ''):
         self.is_tb_set = False
         super(CustomCallback, self).__init__(verbose)
         # Those variables will be accessible in the callback
@@ -31,6 +31,9 @@ class CustomCallback(BaseCallback):
         # self.parent = None  # type: Optional[BaseCallback]
         self.workload_hist = deque(maxlen=100)
         self.deadline_hist = deque(maxlen=100)
+        self.best_score = -100000
+        self.path = path
+        self.n_calls = 0
         #self.balance_punishement_hist = deque(maxlen=100)
 
     def _on_training_start(self) -> None:
@@ -82,7 +85,11 @@ class CustomCallback(BaseCallback):
         """
         This event is triggered before updating the policy.
         """
-        # Hier noch saven
+        self.n_calls += 1
+        if np.mean(self.locals['rollout_buffer'].returns) > self.best_score and self.n_calls > 10:
+            print(f"Saving new best model to {self.path}")
+            self.best_score = np.mean(self.locals['rollout_buffer'].returns)
+            self.model.save(self.path)
         pass
 
     def _on_training_end(self) -> None:
