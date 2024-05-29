@@ -1,0 +1,13 @@
+prefix=d:/Studium/Masterarbeit/Isri/.conda/Library
+exec_prefix=d:/Studium/Masterarbeit/Isri/.conda/Library
+libdir=d:/Studium/Masterarbeit/Isri/.conda/Library/lib
+sharedlibdir=d:/Studium/Masterarbeit/Isri/.conda/Library/lib
+includedir=d:/Studium/Masterarbeit/Isri/.conda/Library/include
+
+Name: zlib
+Description: zlib compression library
+Version: 1.2.13
+
+Requires:
+Libs: -L${libdir} -L${sharedlibdir} -lz
+Cflags: -I${includedir}
