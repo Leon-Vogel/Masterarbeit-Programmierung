@@ -39,7 +39,7 @@ class IsriEnv(gym.Env):
         self.workload_gap = 0
         self.deadline_r = 0
         self.diffsum_r = 0
-        self.reward_log = 0
+        #self.reward_log = -100000
         self.balance_punishement = 0
         self.jobclasses = {idx: [] for idx in range(self.n_classes)}
         if self.cluster_method == "kmeans":
@@ -52,7 +52,7 @@ class IsriEnv(gym.Env):
     def reset(self, *, seed=None, options=None):
         self.genome = []
         self.steps = 0
-        self.reward_log = 0
+        # self.reward_log = -100000
         random_index = random.choice(list(range(0, len(self.dataset.data['Jobdata']))))
         self.selected_index = random_index
         self.jobdata = self.dataset.data['Jobdata'][random_index]
@@ -83,13 +83,14 @@ class IsriEnv(gym.Env):
         # print(f"self.genome: {self.genome}")
         reward = self._get_reward()
         obs = self.make_obs()
+        #self.reward_log += reward
         #self.log_to_file(LOGPATH, str(obs))
         #self.log_to_file(LOGPATH, f'Reward: {reward}')
         terminated = False
         # info = self._get_info()
         if self.steps >= len(self.jobdata):
             terminated = True
-            self.reward_log += reward
+            
             #self.log_to_file(LOGPATH, 'New Episode')
         return obs, reward, terminated, False, {}
 
@@ -167,7 +168,7 @@ class IsriEnv(gym.Env):
         elif self.reward_type == 'dense':
             return self._get_reward_dense()
         elif self.reward_type == 'combined':
-            return self._get_reward_dense()+self._get_reward_sparse()
+            return (self._get_reward_dense()*0.1)+self._get_reward_sparse()
 
     def _get_reward_sparse(self):
         if self.steps == len(self.jobdata): # - 1
@@ -176,16 +177,11 @@ class IsriEnv(gym.Env):
             diffsum_difference = (diffsum - self.curr_target_values[0]) / self.curr_target_values[0]
             tardiness_difference = (self.curr_target_values[1] - tardiness) / self.curr_target_values[1]
             # balance_reward = np.abs(diffsum_difference - tardiness_difference) # Belohnen wenn Ziele im selben Maß erreicht werden
-            balance_reward = 0
             self.workload_gap = diffsum_difference            
             self.deadline_gap = tardiness_difference
-            self.balance_punishement = balance_reward
             #return (diffsum_difference + tardiness_difference - balance_reward) * 100
-            try:
-                reward = (diffsum_difference + tardiness_difference - balance_reward) * 100
-                reward = float(reward)
-            except TypeError:
-                print('Debug')
+            reward = (diffsum_difference + tardiness_difference) * 1
+            reward = float(reward)
             return reward
         else:
             return 0
@@ -202,12 +198,14 @@ class IsriEnv(gym.Env):
             self.workload_gap = diffsum_difference            
             self.deadline_gap = tardiness_difference
             self.balance_punishement = balance_reward
+            #if tardiness > 0:
+            #    tardiness = -tardiness
+            #else:
+            #    tardiness = 0
             #return (diffsum_difference + tardiness_difference - balance_reward) * 100
-            try:
-                reward =  - tardiness/20 #(-diffsum)/10000
-                reward = float(reward)
-            except TypeError:
-                print('Debug')
+            
+            reward = (-diffsum)/30000 - tardiness/20 #
+            reward = float(reward)
             return reward
         else:
             return 0
@@ -222,10 +220,15 @@ class IsriEnv(gym.Env):
             # Tardiness Änderung
             last_job_deadline = self.jobdata[self.genome[-1]]['due_date']
             current_finish_time = (self.steps + self.n_machines) * self.conv_speed
-            tardiness = -np.exp((current_finish_time - last_job_deadline) / 3600) # 3600 Sekunden = 1 Stunde
+            #tardiness = -np.exp((current_finish_time - last_job_deadline) / 3600) # 3600 Sekunden = 1 Stunde
+            tardiness = ((current_finish_time - last_job_deadline) / 3600) # 3600 Sekunden = 1 Stunde
+            #if tardiness > 0:
+            #    tardiness = -tardiness
+            #else:
+            tardiness = -tardiness
 
-            self.deadline_r = tardiness
-            self.diffsum_r = diffsum
+            self.deadline_r = tardiness * self.tardiness_weight
+            self.diffsum_r = diffsum * self.diffsum_weight
             if self.steps == len(self.jobdata):
                 diffsum_temp, tardiness_temp = fast_sim_diffsum(np.array(self.genome), jobs=self.jobdata, jpl=self.jpl,
                                                   conv_speed=self.conv_speed, n_machines=self.n_machines)
@@ -236,7 +239,7 @@ class IsriEnv(gym.Env):
                 self.workload_gap = diffsum_difference            
                 self.deadline_gap = tardiness_difference
             try:
-                reward = diffsum * self.diffsum_weight + tardiness * self.tardiness_weight
+                reward = tardiness * self.tardiness_weight + diffsum * self.diffsum_weight 
                 reward = float(reward)
             except TypeError:
                 print('Debug')
@@ -388,13 +391,13 @@ class IsriEnv(gym.Env):
         last_n_features: für die letzten n Produkte welche Aufwände + Deadline verplant wurden
         """
         #Deadline etc. für leere Klassen ist -1, 
-        obs = np.ones((self.n_classes, 14))*-1 # 14 = 1 deadline + 1 Anzahl + 12 Aufwände next
+        obs = np.zeros((self.n_classes, 14))#*-1 # 14 = 1 deadline + 1 Anzahl + 12 Aufwände next
         for cls in range(self.n_classes):
             class_products = self.jobclasses[cls]
             if len(class_products) > 0:
                 next_product = class_products[0]
                 next_deadline = self.jobdata[next_product]['due_date']
-                next_deadline = (next_deadline - self.conv_speed * self.steps) / (self.conv_speed*100)
+                next_deadline = (next_deadline - self.conv_speed * self.steps ) / (self.conv_speed*100) #Next deadline ändern und leere klassen wieder auf 0?
                 next_times = self.jobdata[next_product]['times']
                 
                 amount = len(class_products)/len(self.jobdata)
@@ -403,7 +406,7 @@ class IsriEnv(gym.Env):
                 obs[cls, :] = row
         
         # Extract times for the last self.last_n entries of planned_jobs
-        last_n_array = np.ones((self.last_n, self.features_per_job)) * -1
+        last_n_array = np.zeros((self.last_n, self.features_per_job))# * -1
         size_last_n = min((len(self.genome), self.last_n))
         if size_last_n > 0:
             last_n_times = np.array([self.jobdata[job]['times']+[self.jobdata[job]['due_date']] for job in self.genome[-size_last_n:]])
@@ -412,6 +415,8 @@ class IsriEnv(gym.Env):
             last_n_array[-size_last_n:, :-1] /= self.conv_speed #Normalisierung mit conveyer speed
 
             last_n_array[-size_last_n:, -1] = (last_n_array[-size_last_n:, -1] - self.conv_speed * self.steps) / (self.conv_speed*100)
+
+            #Verspätung zu den letzten Jobs hinzufügen
 
         progress = np.array(self.steps / len(self.jobdata)).reshape([1,])
 
