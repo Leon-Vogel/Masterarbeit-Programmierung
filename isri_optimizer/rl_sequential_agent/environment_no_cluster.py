@@ -80,7 +80,7 @@ class IsriEnv_no_cluster(gym.Env):
         self._add_job_to_genome(action)
         # self._add_job_to_genome_heurist(action)
         # print(f"self.genome: {self.genome}")
-        reward = self._get_reward_sparse()
+        reward = self._get_reward()
         obs = self.make_obs()
         terminated = False
         # info = self._get_info()
