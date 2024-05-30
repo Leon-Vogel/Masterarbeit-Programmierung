@@ -1,5 +1,6 @@
 from _dir_init import *
 from isri_optimizer.rl_sequential_agent.environment import IsriEnv
+from isri_optimizer.rl_sequential_agent.environment_no_cluster import IsriEnv_no_cluster
 from sb3_contrib.ppo_mask import MaskablePPO
 import pickle
 from data_preprocessing import IsriDataset
@@ -10,7 +11,7 @@ from sklearn.cluster import KMeans
 import torch as th
 from itertools import product
 from typing import Callable
-from data_split import train_test_split
+from data_split import train_test
 
 
 SAVE_FREQUENCY = 100_000
@@ -22,14 +23,15 @@ N_TRAINING_INSTANCES = 500
 GA_SOLUTIONS_PATH = "./isri_optimizer/rl_sequential_agent/IsriDataset.pkl" #ToDo: Muss diese Datei auch aktualisiert werden?
 N_TRIES = 1
 
-data = train_test_split(min_length=20, max_length=100, path=GA_SOLUTIONS_PATH, N_TRAINING_INSTANCES=N_TRAINING_INSTANCES ,all_data=False)
-isri_dataset = data.get_data()
+data = train_test(min_length=20, max_length=100, path=GA_SOLUTIONS_PATH, N_TRAINING_INSTANCES=N_TRAINING_INSTANCES ,all_data=False, save=False)
+# isri_dataset, test_dataset = data.get_mixed_data() #für unterschiedlich große Instanzen
+isri_dataset, isri_dataset_test = data.get_data() #für gleichgroße Instanzen
 # Loading instances and creating config
-isri_dataset = pickle.load(open(GA_SOLUTIONS_PATH, 'rb'))
-isri_dataset.data['Jobdata'] = isri_dataset.data['Jobdata'][:N_TRAINING_INSTANCES]
-isri_dataset.data['Files'] = isri_dataset.data['Files'][:N_TRAINING_INSTANCES]
-isri_dataset.data['GAChromosome'] = isri_dataset.data['GAChromosome'][:N_TRAINING_INSTANCES]
-isri_dataset.data['GAFitness'] = isri_dataset.data['GAFitness'][:N_TRAINING_INSTANCES]
+#isri_dataset = pickle.load(open(GA_SOLUTIONS_PATH, 'rb'))
+#isri_dataset.data['Jobdata'] = isri_dataset.data['Jobdata'][:N_TRAINING_INSTANCES]
+#isri_dataset.data['Files'] = isri_dataset.data['Files'][:N_TRAINING_INSTANCES]
+#isri_dataset.data['GAChromosome'] = isri_dataset.data['GAChromosome'][:N_TRAINING_INSTANCES]
+#sri_dataset.data['GAFitness'] = isri_dataset.data['GAFitness'][:N_TRAINING_INSTANCES]
 
 
 def linear_schedule(initial_value: float) -> Callable[[float], float]:
@@ -62,9 +64,9 @@ env_config = {
 
 env_config_variants = {
     "last_n": [20],
-    "reward_type": ["sparse"], #sparse dense combined sparse_sum
+    "reward_type": ["dense"], #sparse dense combined sparse_sum
     "n_classes": [8, 10, 12], # Muss mit Kmeans übereinstimmen
-    "cluster_method": ["neighbour", "kmeans"] #kmeans model übergeben
+    "cluster_method": ["no_cluster", "neighbour", "kmeans"] #kmeans neighbour no_cluster
 }
 
 
@@ -98,27 +100,18 @@ ppo_config = {
 
 
 if __name__ == '__main__':
-    # import cProfile, pstats
-    # profiler = cProfile.Profile()    
-    # profiler.enable() 
     for name, config in envs.items():
         for try_idx in range(N_TRIES):
-            env = IsriEnv(config)
+            if config["cluster_method"] == "no_cluster":
+                env = IsriEnv_no_cluster(config)
+            else:
+                env = IsriEnv(config)
             ppo_config['env'] = env
-            #dqn_config['env'] = env
-            #save_callback = CheckpointCallback(save_freq=SAVE_FREQUENCY, save_path=MODEL_SAVE_DIR + f"/_{name}")
             callback = CustomCallback(path=f'{MODEL_SAVE_DIR}_{name}' + f'/{name}_best_model')
             model = MaskablePPO(**ppo_config, learning_rate=linear_schedule(0.0005) ,tensorboard_log=f'{MODEL_SAVE_DIR}_{name}') #, ent_coef=linear_schedule(0.001)
-            # model = DQN(**dqn_config)
-            # logname = f"Training_multiple_instances_gamma_{ppo_config['gamma']}_lr_{ppo_config['learning_rate']}_clip_range_{ppo_config['clip_range']}"
             model.learn(TOTAL_TRAINING_STEPS, tb_log_name=f'{name}', callback=callback)
-            # model.learn(TOTAL_TRAINING_STEPS, callback=callback)
-            # profiler.disable()
-            
             model.save(f'{MODEL_SAVE_DIR}_{name}' + f'/{name}_{TOTAL_TRAINING_STEPS}_{try_idx}')
             with open(f'{MODEL_SAVE_DIR}_{name}' + f'/{name}_config.txt', "w") as outfile:
                 outfile.write(str(config))
                 outfile.write("\n")
                 outfile.write(str(ppo_config))
-            # stats = pstats.Stats(profiler)
-            # stats.dump_stats('isri_optimizer/rl_sequential_agent/training_profile.prof')
