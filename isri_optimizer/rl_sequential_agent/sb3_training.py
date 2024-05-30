@@ -81,7 +81,7 @@ ppo_config = {
     'n_steps': 1024, #1024, #The number of steps to run for each environment per update 
     'batch_size': 128, #Minibatch size
     'n_epochs': 10, #Number of epoch when optimizing the surrogate loss
-    'gamma': 0.99, #Discount factor
+    'gamma': 0.9999, #Discount factor
     'gae_lambda': 0.95, # gae_lambda: float = 0.95
     'ent_coef': 0.01, #Entropy coefficient for the loss calculation
     'clip_range': 0.2, #Clipping parameter
@@ -104,11 +104,11 @@ if __name__ == '__main__':
             ppo_config['env'] = env
             #dqn_config['env'] = env
             #save_callback = CheckpointCallback(save_freq=SAVE_FREQUENCY, save_path=MODEL_SAVE_DIR + f"/_{name}")
-            callback = CustomCallback(path=f'{MODEL_SAVE_DIR}_{name}' + f'/{name}_gamma099_best_model')
+            callback = CustomCallback(path=f'{MODEL_SAVE_DIR}_{name}' + f'/{name}_best_model')
             model = MaskablePPO(**ppo_config, learning_rate=linear_schedule(0.0005) ,tensorboard_log=f'{MODEL_SAVE_DIR}_{name}') #, ent_coef=linear_schedule(0.001)
             # model = DQN(**dqn_config)
             # logname = f"Training_multiple_instances_gamma_{ppo_config['gamma']}_lr_{ppo_config['learning_rate']}_clip_range_{ppo_config['clip_range']}"
-            model.learn(TOTAL_TRAINING_STEPS, tb_log_name=f'{name}_gamma099', callback=callback)
+            model.learn(TOTAL_TRAINING_STEPS, tb_log_name=f'{name}', callback=callback)
             # model.learn(TOTAL_TRAINING_STEPS, callback=callback)
             # profiler.disable()
             
