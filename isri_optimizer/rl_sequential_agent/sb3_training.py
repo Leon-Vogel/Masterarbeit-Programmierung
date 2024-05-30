@@ -10,17 +10,20 @@ from sklearn.cluster import KMeans
 import torch as th
 from itertools import product
 from typing import Callable
+from data_split import train_test_split
 
 
 SAVE_FREQUENCY = 100_000
 TOTAL_TRAINING_STEPS = 1000_000
-MODEL_SAVE_DIR = f"./isri_optimizer/rl_sequential_agent/savefiles_0530/"
+MODEL_SAVE_DIR = f"./isri_optimizer/rl_sequential_agent/savefiles_test/"
 JOBDATA_DIR = './isri_optimizer/instances/'
-SAVEFILE = f"./isri_optimizer/rl_sequential_agent/savefiles_0530/_best_chromosome"
+SAVEFILE = f"./isri_optimizer/rl_sequential_agent/savefiles_test/_best_chromosome"
 N_TRAINING_INSTANCES = 500
 GA_SOLUTIONS_PATH = "./isri_optimizer/rl_sequential_agent/IsriDataset.pkl" #ToDo: Muss diese Datei auch aktualisiert werden?
 N_TRIES = 1
 
+data = train_test_split(min_length=20, max_length=100, path=GA_SOLUTIONS_PATH, N_TRAINING_INSTANCES=N_TRAINING_INSTANCES ,all_data=False)
+isri_dataset = data.get_data()
 # Loading instances and creating config
 isri_dataset = pickle.load(open(GA_SOLUTIONS_PATH, 'rb'))
 isri_dataset.data['Jobdata'] = isri_dataset.data['Jobdata'][:N_TRAINING_INSTANCES]
