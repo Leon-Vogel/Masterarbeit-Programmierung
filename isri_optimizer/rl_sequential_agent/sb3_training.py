@@ -16,14 +16,14 @@ from data_split import train_test
 
 SAVE_FREQUENCY = 100_000
 TOTAL_TRAINING_STEPS = 1000_000
-MODEL_SAVE_DIR = f"./isri_optimizer/rl_sequential_agent/savefiles_0531/"
+MODEL_SAVE_DIR = f"./isri_optimizer/rl_sequential_agent/savefiles_Train1/"
 JOBDATA_DIR = './isri_optimizer/instances/'
-SAVEFILE = f"./isri_optimizer/rl_sequential_agent/savefiles_0531/_best_chromosome"
+SAVEFILE = f"./isri_optimizer/rl_sequential_agent/savefiles_Train1/_best_chromosome"
 N_TRAINING_INSTANCES = 500
 GA_SOLUTIONS_PATH = "./isri_optimizer/rl_sequential_agent/IsriDataset.pkl" #ToDo: Muss diese Datei auch aktualisiert werden?
 N_TRIES = 1
 
-data = train_test(min_length=20, max_length=100, path=GA_SOLUTIONS_PATH, N_TRAINING_INSTANCES=N_TRAINING_INSTANCES ,all_data=False, save=False)
+data = train_test(min_length=20, max_length=100, path=GA_SOLUTIONS_PATH, N_TRAINING_INSTANCES=N_TRAINING_INSTANCES ,all_data=True, save=True)
 # isri_dataset, test_dataset = data.get_mixed_data() #für unterschiedlich große Instanzen
 isri_dataset, isri_dataset_test = data.get_data() #für gleichgroße Instanzen
 # Loading instances and creating config
@@ -66,8 +66,8 @@ env_config = {
 
 env_config_variants = {
     "last_n": [3], #20
-    "reward_type": ["sparse"], #sparse dense combined sparse_sum
-    "n_classes": [8, 10, 12], # Muss mit Kmeans übereinstimmen
+    "reward_type": ["dense", "sparse"], #sparse dense combined sparse_sum , "sparse_sum"
+    "n_classes": [8, 12, 15], # Muss mit Kmeans übereinstimmen
     "cluster_method": ["kmeans", "neighbour", "no_cluster"] #kmeans neighbour no_cluster
 }
 
