@@ -79,7 +79,7 @@ class IsriEnv(gym.Env):
     def step(self, action: int):
         self._add_job_to_genome(action)
         #self.log_to_file(LOGPATH, str(action))
-        # self._add_job_to_genome_heurist(action)
+        #self._add_job_to_genome_heurist(action)
         # print(f"self.genome: {self.genome}")
         reward = self._get_reward()
         obs = self.make_obs()
@@ -134,8 +134,10 @@ class IsriEnv(gym.Env):
         self.last_n = env_config["last_n"]
         self.features_per_job = env_config['input_features']
         self.diffsum_weight = env_config["diffsum_weight"]
+        self.diffsum_weight_sum = env_config["diffsum_weight_sum"]
         self.DIFFSUM_NORM = env_config["DIFFSUM_NORM"] #Was ist das Norm?
         self.tardiness_weight = env_config["tardiness_weight"]
+        self.tardiness_weight_sum = env_config["tardiness_weight_sum"]
         self.TARDINESS_NORM = env_config["TARDINESS_NORM"]
         self.pca = env_config['pca']
         self.n_classes = env_config['n_classes']
@@ -198,16 +200,20 @@ class IsriEnv(gym.Env):
             self.workload_gap = diffsum_difference            
             self.deadline_gap = tardiness_difference
             self.balance_punishement = balance_reward
-            #if tardiness > 0:
-            #    tardiness = -tardiness
+
+            #if tardiness > 0 :
+            #    self.deadline_r = (-tardiness) * self.tardiness_weight_sum
             #else:
-            #    tardiness = 0
-            #return (diffsum_difference + tardiness_difference - balance_reward) * 100
+            #    self.deadline_r = 0
+            self.deadline_r = (-tardiness) * self.tardiness_weight_sum
+            self.diffsum_r = (-diffsum) * self.diffsum_weight_sum
             
-            reward = (-diffsum)/30000 - tardiness/20 #
+            reward = self.diffsum_r + self.deadline_r
             reward = float(reward)
             return reward
         else:
+            self.deadline_r =0
+            self.diffsum_r =0
             return 0
         
     def _get_reward_dense(self):
@@ -225,10 +231,10 @@ class IsriEnv(gym.Env):
             #if tardiness > 0:
             #    tardiness = -tardiness
             #else:
+            #    tardiness = 0# -tardiness*0.1
             tardiness = -tardiness
-
-            self.deadline_r = tardiness * self.tardiness_weight
-            self.diffsum_r = diffsum * self.diffsum_weight
+            self.deadline_r += tardiness * self.tardiness_weight
+            self.diffsum_r += diffsum * self.diffsum_weight
             if self.steps == len(self.jobdata):
                 diffsum_temp, tardiness_temp = fast_sim_diffsum(np.array(self.genome), jobs=self.jobdata, jpl=self.jpl,
                                                   conv_speed=self.conv_speed, n_machines=self.n_machines)
@@ -245,6 +251,8 @@ class IsriEnv(gym.Env):
                 print('Debug')
             return reward
         else:
+            self.deadline_r =0
+            self.diffsum_r =0
             return 0
     
     def _get_info(self):
