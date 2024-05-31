@@ -59,8 +59,6 @@ class IsriEnv_no_cluster(gym.Env):
         self.seed = 0
 
     def reset(self, *, seed=None, options=None):
-        self.deadline_r = 0
-        self.diffsum_r = 0
         self.genome = []
         self.steps = 0
         random_index = random.choice(list(range(0, len(self.dataset.data['Jobdata']))))
@@ -133,8 +131,10 @@ class IsriEnv_no_cluster(gym.Env):
         #self.curr_goal = env_config['goal']
         self.obs_type = env_config['obs_space']
         self.diffsum_weight = env_config["diffsum_weight"]
+        self.diffsum_weight_sum = env_config["diffsum_weight_sum"]
         self.DIFFSUM_NORM = env_config["DIFFSUM_NORM"] #Was ist das Norm?
         self.tardiness_weight = env_config["tardiness_weight"]
+        self.tardiness_weight_sum = env_config["tardiness_weight_sum"]
         self.TARDINESS_NORM = env_config["TARDINESS_NORM"]
         self.pca = env_config['pca']
         self.n_classes = env_config['n_classes']
@@ -181,18 +181,20 @@ class IsriEnv_no_cluster(gym.Env):
             self.workload_gap = diffsum_difference            
             self.deadline_gap = tardiness_difference
             self.balance_punishement = balance_reward
-            #if tardiness > 0:
-            #    tardiness = -tardiness
+
+            #if tardiness > 0 :
+            #    self.deadline_r = (-tardiness) * self.tardiness_weight_sum
             #else:
-            #    tardiness = 0
-            #return (diffsum_difference + tardiness_difference - balance_reward) * 100
-            self.deadline_r += (-tardiness)/20
-            self.diffsum_r += (-diffsum)/30000
+            #    self.deadline_r = 0
+            self.deadline_r = (-tardiness) * self.tardiness_weight_sum
+            self.diffsum_r = (-diffsum) * self.diffsum_weight_sum
             
             reward = self.diffsum_r + self.deadline_r
             reward = float(reward)
             return reward
         else:
+            self.deadline_r =0
+            self.diffsum_r =0
             return 0
         
     def _get_reward_dense(self):
@@ -207,11 +209,11 @@ class IsriEnv_no_cluster(gym.Env):
             current_finish_time = (self.steps + self.n_machines) * self.conv_speed
             #tardiness = -np.exp((current_finish_time - last_job_deadline) / 3600) # 3600 Sekunden = 1 Stunde
             tardiness = ((current_finish_time - last_job_deadline) / 3600) # 3600 Sekunden = 1 Stunde
-            if tardiness > 0:
-                tardiness = -tardiness
-            else:
-                tardiness = 0# -tardiness*0.1
-
+            #if tardiness > 0:
+            #    tardiness = -tardiness
+            #else:
+            #    tardiness = 0# -tardiness*0.1
+            tardiness = -tardiness
             self.deadline_r += tardiness * self.tardiness_weight
             self.diffsum_r += diffsum * self.diffsum_weight
             if self.steps == len(self.jobdata):
@@ -230,6 +232,8 @@ class IsriEnv_no_cluster(gym.Env):
                 print('Debug')
             return reward
         else:
+            self.deadline_r =0
+            self.diffsum_r =0
             return 0
 
     def _get_info(self):

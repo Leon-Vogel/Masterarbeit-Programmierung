@@ -60,17 +60,19 @@ class CustomCallback(BaseCallback):
         :return: If the callback returns False, training is aborted early.
         """
         if self.n_calls == 1:
-            self.deadline_r_hist = deque(maxlen=self.locals['n_rollout_steps'])
-            self.diffsum_r_hist = deque(maxlen=self.locals['n_rollout_steps'])
+            #self.deadline_r_hist = deque(maxlen=self.locals['n_rollout_steps'])
+            #self.diffsum_r_hist = deque(maxlen=self.locals['n_rollout_steps'])
+            self.deadline_r_hist = deque(maxlen=100)
+            self.diffsum_r_hist = deque(maxlen=100)
         
         dones = self.locals['dones']
         for idx in range(dones.shape[0]):
-            self.deadline_r_hist.append(self.locals['env'].envs[idx].deadline_r)
-            self.diffsum_r_hist.append(self.locals['env'].envs[idx].diffsum_r)
             if dones[idx]:
                 env = self.locals['env'].envs[idx].env
                 self.deadline_hist.append(env.deadline_gap)
                 self.workload_hist.append(env.workload_gap)
+                self.deadline_r_hist.append(self.locals['env'].envs[idx].deadline_r)
+                self.diffsum_r_hist.append(self.locals['env'].envs[idx].diffsum_r)
 
                 #self.balance_punishement_hist.append(env.balance_punishement)
                 self.logger.record('deadline_gap', np.mean(self.deadline_hist))
