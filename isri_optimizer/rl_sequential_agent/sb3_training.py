@@ -15,8 +15,8 @@ from data_split import train_test
 
 
 SAVE_FREQUENCY = 100_000
-TOTAL_TRAINING_STEPS = 1000_000
-MODEL_SAVE_DIR = f"./isri_optimizer/rl_sequential_agent/savefiles_test/"
+TOTAL_TRAINING_STEPS = 1500_000
+MODEL_SAVE_DIR = f"./isri_optimizer/rl_sequential_agent/savefiles_Train1/"
 JOBDATA_DIR = './isri_optimizer/instances/'
 SAVEFILE = f"./isri_optimizer/rl_sequential_agent/savefiles_test/_best_chromosome"
 N_TRAINING_INSTANCES = 500
@@ -77,7 +77,7 @@ combinations = [dict(zip(keys, combination)) for combination in product(*values)
 envs = {}
 for combination in combinations:
     name = "_".join(f"{value}" for key, value in combination.items())
-    new_dict = env_config.copy()
+    new_dict = env_config.copy()    
     new_dict.update(combination)
     envs[name] = new_dict
 
