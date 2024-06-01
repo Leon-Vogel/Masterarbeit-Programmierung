@@ -209,11 +209,11 @@ class IsriEnv_no_cluster(gym.Env):
             current_finish_time = (self.steps + self.n_machines) * self.conv_speed
             #tardiness = -np.exp((current_finish_time - last_job_deadline) / 3600) # 3600 Sekunden = 1 Stunde
             tardiness = ((current_finish_time - last_job_deadline) / 3600) # 3600 Sekunden = 1 Stunde
-            #if tardiness > 0:
-            #    tardiness = -tardiness
-            #else:
-            #    tardiness = 0# -tardiness*0.1
-            tardiness = -tardiness
+            if tardiness > 0:
+                tardiness = -tardiness
+            else:
+                tardiness = 0 # -tardiness*0.001 #0
+            #tardiness = -tardiness
             self.deadline_r += tardiness * self.tardiness_weight
             self.diffsum_r += diffsum * self.diffsum_weight
             if self.steps == len(self.jobdata):
