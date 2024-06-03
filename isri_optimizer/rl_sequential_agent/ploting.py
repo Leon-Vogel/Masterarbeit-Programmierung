@@ -3,18 +3,19 @@ import numpy as np
 import pandas as pd
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 from tensorflow.python.summary.summary_iterator import summary_iterator
+from ploting_funktion import ergebnisse_plot
 
-fsize = 9
-tsize = 9
+fsize = 7
+tsize = 7
 tdir = 'in'
 major = 5
 minor = 3
 style = 'default'  # 'default' helvetica
 
 
-def ergebnisse_plot(x_data_list, y_data_list, title="", x_label="", y_label="",
+def ergebnisse_plot_alt(x_data_list, y_data_list, title="", x_label="", y_label="",
                     x_scale='linear', y_scale='linear',
-                    x_ticks=None, y_ticks=None, font_size=9, file_path="plots2\\",
+                    x_ticks=None, y_ticks=None, font_size=7, file_path="isri_optimizer/rl_sequential_agent/plots/",
                     file_name="plot.png", dpi=500, figsize=(4, 3),
                     line_styles=None, colors=None, labels=None,
                     moving_average=False, ma_interval=1, leg_pos='upper right',
@@ -60,8 +61,10 @@ def ergebnisse_plot(x_data_list, y_data_list, title="", x_label="", y_label="",
     plt.rcParams['legend.fontsize'] = tsize
     plt.rcParams['xtick.direction'] = tdir
     plt.rcParams['ytick.direction'] = tdir
-    # plt.rcParams['xtick.major.size'] = major
-    # plt.rcParams['xtick.minor.size'] = minor
+    plt.rcParams['xtick.labelsize'] = tsize
+    plt.rcParams['ytick.labelsize'] = tsize
+    # plt.rcParams['xtick.major.size'] = tsize
+    # plt.rcParams['xtick.minor.size'] = tsize
     # plt.rcParams['ytick.major.size'] = major
     # plt.rcParams['ytick.minor.size'] = minor
 
@@ -104,14 +107,14 @@ def ergebnisse_plot(x_data_list, y_data_list, title="", x_label="", y_label="",
                      color=colors[i], alpha=0.7)
             log.append(moving_avg)
 
-    with open(file_path+file_name+'moving_avg.txt', 'w') as file:
-        for data in log:
-            file.write(str(data[-30:]) + '\n')
+    #with open(file_path+file_name+'moving_avg.txt', 'w') as file:
+    #    for data in log:
+    #        file.write(str(data[-30:]) + '\n')
 
     # Legende anzeigen
-    #if labels:
-    #    plt.legend(loc=leg_pos, prop={
-    #        'family': 'Helvetica'})
+    if labels:
+        plt.legend(loc=leg_pos, prop={
+            'family': 'Helvetica'})
 
     # plt.ylim([y_low, y_high])
 
@@ -128,35 +131,22 @@ def ergebnisse_plot(x_data_list, y_data_list, title="", x_label="", y_label="",
 
 
 # Beispiel:
-'''x_data = np.linspace(0, 10, 100)
-y_data1 = np.sin(x_data)
-y_data2 = np.cos(x_data)
-create_scientific_plot([x_data, x_data], [y_data1, y_data2],
-                       title="Sinus- und Kosinus-Funktion",
-                       x_label="x-Werte", y_label="y-Werte",
-                       x_scale='linear', y_scale='linear',
-                       font_size=14, file_path="Plots/", file_name="sin_cos_plot.png",
-                       dpi=300, line_styles=['-', '--'], colors=['blue', 'red'],
-                       labels=['Sinus', 'Kosinus'], moving_average=True, ma_interval=5)
-'''
+
 
 Experimente = [
-    'Ergebnisse\Mask_Exp1\Mask_PPO_Auslastung\[256-256-128-64]_Auslastung_001__1\events.out.tfevents.1690909404.DESKTOP-6FHK9F7.20896.0',
-    'Ergebnisse\Mask_Exp1\Mask_PPO_Warteschlangen\[256-256-128-64]_Warteschlangen_001__1\events.out.tfevents.1690930083.DESKTOP-6FHK9F7.20896.1',
-    'Ergebnisse\\No_Mask_Exp3\\NoMask_PPO_Auslastung\[256-256-128-64]_Auslastung_001__1\events.out.tfevents.1691750247.DESKTOP-6FHK9F7.15332.0',
-    'Ergebnisse\\No_Mask_Exp3\\NoMask_PPO_Warteschlangen\[256-256-128-64]_Warteschlangen_001__1\events.out.tfevents.1691770869.DESKTOP-6FHK9F7.15332.1']
+    'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_8_kmeans/3_sparse_8_kmeans_1/events.out.tfevents.1717196323.DESKTOP-6FHK9F7.8532.9',
+    'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_8_neighbour/3_sparse_8_neighbour_1/events.out.tfevents.1717202642.DESKTOP-6FHK9F7.8532.10',
+    'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_8_no_cluster/3_sparse_8_no_cluster_1/events.out.tfevents.1717205357.DESKTOP-6FHK9F7.8532.11']
 
-names = [r'$R_{A_{M}}$', r'$R_{W_{M}}$', r'$R_{A_{P}}$', r'$R_{W_{P}}$']
+#names = [r'$Kmeans$', r'$KNN$', r'$No Cluster$']
+names = [r'Kmeans', r'KNN', r'No Cluster']
 x_rew = []
 y_rew = []
-x_schl = []
-y_schl = []
-x_ausl = []
-y_ausl = []
-x_plan = []
-y_plan = []
-x1_0 = []
-y1_0 = []
+x_diff = []
+y_diff = []
+x_tard = []
+y_tard = []
+
 
 for i in range(len(names)):
     d = {}
@@ -175,12 +165,11 @@ for i in range(len(names)):
 
     x_rew.append(list(df['rollout/ep_rew_mean'].index.values))
     y_rew.append(df['rollout/ep_rew_mean'].to_list())
-    x_schl.append(list(df['Mittelwert/Warteschlangen'].index.values))
-    y_schl.append(df['Mittelwert/Warteschlangen'].to_list())
-    x_ausl.append(list(df['Varianz/Auslastung'].index.values))
-    y_ausl.append(df['Varianz/Auslastung'].to_list())
-    x_plan.append(list(df['Plan/Anteil_fertigeProdukte'].index.values))
-    y_plan.append(df['Plan/Anteil_fertigeProdukte'].to_list())
+    x_diff.append(list(df['workload_gap'].index.values))
+    y_diff.append(df['workload_gap'].to_list())
+    x_tard.append(list(df['deadline_gap'].index.values))
+    y_tard.append(df['deadline_gap'].to_list())
+    '''
 
     x1_0.append(df['Dlz/Typ1'].index.values)
     y1_1 = (df['Dlz/Typ1'].to_list())
@@ -189,7 +178,7 @@ for i in range(len(names)):
     y1_4 = (df['Dlz/Typ4'].to_list())
     y1_5 = (df['Dlz/Typ5'].to_list())
     tmp = np.array([y1_1, y1_2, y1_3, y1_4, y1_5])
-    y1_0.append(np.average(tmp, axis=0))
+    y1_0.append(np.average(tmp, axis=0))'''
 
 # print(x_rew)
 # print(y_rew)
@@ -198,21 +187,33 @@ for i in range(len(names)):
 # names = ['$RAM$', '$RWM$', '$RAP$', '$RWP$']
 
 fenster = 31
-linestyle = ['solid', 'solid', 'dashed', 'dashed']
-colors = ['tab:blue', 'tab:red', 'tab:blue', 'tab:red']
+linestyle = ['solid', 'solid', 'solid']
+colors = ['tab:blue', 'tab:red', 'tab:green']
 
-ergebnisse_plot(x_schl, y_schl, labels=names, title='Warteschlangen', file_name='Warteschlangen',
+
+ergebnisse_plot(x_rew, y_rew, labels=names, title='Return bei acht Aktionen', file_name='Return8',
                 moving_average=True, ma_interval=fenster, line_styles=linestyle,
                 colors=colors, y_low=None, y_high=None,
-                x_label="Trainingsschritt",
-                y_label="$\overline{f_{3,...,7}}$ gemittelte Anzahl Produkte auf Förderstrecken")
+                x_label="Rollout", y_label="gemittelter Return",
+                leg_pos='lower right', file_path="isri_optimizer/rl_sequential_agent/plots/sparse/")
 
-ergebnisse_plot(x_schl, y_schl, labels=names, title='Warteschlangen', file_name='Warteschlangen',
+
+ergebnisse_plot(x_diff, y_diff, labels=names, title='Vergleich der Auslastung bei acht Aktionen', file_name='Diffsum8',
                 moving_average=True, ma_interval=fenster, line_styles=linestyle,
                 colors=colors, y_low=None, y_high=None,
-                x_label="Trainingsschritt",
-                y_label="$\overline{f_{3,...,7}}$ gemittelte Anzahl Produkte auf Förderstrecken")
+                x_label="Rollout",
+                y_label="Diffsum Unterschied zum GA",
+                leg_pos='lower right', file_path="isri_optimizer/rl_sequential_agent/plots/sparse/")
 
+ergebnisse_plot(x_tard, y_tard, labels=names, title='Vergleich der Termintreue bei acht Aktionen', file_name='Tardiness8',
+                moving_average=True, ma_interval=fenster, line_styles=linestyle,
+                colors=colors, y_low=None, y_high=None,
+                x_label="Rollout",
+                y_label="Tardiness Unterschied zum GA",
+                leg_pos='lower right', file_path="isri_optimizer/rl_sequential_agent/plots/sparse/")
+
+
+'''
 ergebnisse_plot(x_rew, y_rew, labels=names, title='Return', file_name='Return',
                 moving_average=True, ma_interval=fenster, leg_pos='lower right', line_styles=linestyle,
                 colors=colors, y_low=None, y_high=None,
@@ -233,3 +234,4 @@ ergebnisse_plot(x_ausl, y_ausl, labels=names, title='Varianz der Auslastung', fi
                 colors=colors, y_low=None, y_high=None, line_styles=linestyle,
                 x_label="Trainingsschritt",
                 y_label="$\sigma_{3}+\sigma_{4}$, Varianz der Auslastung in Abschnitt 3 und 4 ")
+'''
