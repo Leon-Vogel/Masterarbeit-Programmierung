@@ -18,7 +18,7 @@ SAVE_FREQUENCY = 100_000
 TOTAL_TRAINING_STEPS = 1500_000
 MODEL_SAVE_DIR = f"./isri_optimizer/rl_sequential_agent/savefiles_Train1/"
 JOBDATA_DIR = './isri_optimizer/instances/'
-SAVEFILE = f"./isri_optimizer/rl_sequential_agent/savefiles_test/_best_chromosome"
+SAVEFILE = f"./isri_optimizer/rl_sequential_agent/savefiles_Train1/_best_chromosome"
 N_TRAINING_INSTANCES = 500
 GA_SOLUTIONS_PATH = "./isri_optimizer/rl_sequential_agent/IsriDataset.pkl" #ToDo: Muss diese Datei auch aktualisiert werden?
 N_TRIES = 1
@@ -56,7 +56,7 @@ env_config = {
     "input_features": 13,  # Example number of features per job
     "obs_space": 'classes', # simple, full, small, classes
     "diffsum_weight": 1/300,#1/30000, #0.1, #diffsum im tausender Bereich
-    "diffsum_weight_sum": 1/30000, 
+    "diffsum_weight_sum": 1/6000, 
     "DIFFSUM_NORM": 1.0,
     "tardiness_weight": 1/4, #1.0
     "tardiness_weight_sum": 1/20, #1/20, 
@@ -66,7 +66,7 @@ env_config = {
 
 env_config_variants = {
     "last_n": [3], #20
-    "reward_type": ["dense"], #sparse dense combined sparse_sum , "sparse_sum"
+    "reward_type": ["sparse_sum"], #sparse dense combined sparse_sum , "sparse_sum"
     "n_classes": [8, 12, 15], # Muss mit Kmeans übereinstimmen
     "cluster_method": ["kmeans", "no_cluster", "neighbour"] #kmeans neighbour no_cluster
 }

@@ -201,12 +201,12 @@ class IsriEnv(gym.Env):
             self.deadline_gap = tardiness_difference
             self.balance_punishement = balance_reward
 
-            #if tardiness > 0 :
-            #    self.deadline_r = (-tardiness) * self.tardiness_weight_sum
-            #else:
-            #    self.deadline_r = 0
-            self.deadline_r = (-tardiness) * self.tardiness_weight_sum
-            self.diffsum_r = (-diffsum) * self.diffsum_weight_sum
+            if tardiness > 0 :
+                self.deadline_r = -tardiness * self.tardiness_weight_sum
+            else:
+                self.deadline_r = 0
+            #self.deadline_r = (-tardiness) * self.tardiness_weight
+            self.diffsum_r = -diffsum * self.diffsum_weight_sum
             
             reward = self.diffsum_r + self.deadline_r
             reward = float(reward)
