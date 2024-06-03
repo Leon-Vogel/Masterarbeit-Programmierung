@@ -3,214 +3,55 @@ import numpy as np
 import pandas as pd
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 from tensorflow.python.summary.summary_iterator import summary_iterator
-from ploting_funktion import ergebnisse_plot
+from ploting_funktion import ergebnisse_plot, read_tensorflow_events, find_event_files_dict
 
-fsize = 7
-tsize = 7
-tdir = 'in'
-major = 5
-minor = 3
-style = 'default'  # 'default' helvetica
-
-
-def ergebnisse_plot_alt(x_data_list, y_data_list, title="", x_label="", y_label="",
-                    x_scale='linear', y_scale='linear',
-                    x_ticks=None, y_ticks=None, font_size=7, file_path="isri_optimizer/rl_sequential_agent/plots/",
-                    file_name="plot.png", dpi=500, figsize=(4, 3),
-                    line_styles=None, colors=None, labels=None,
-                    moving_average=False, ma_interval=1, leg_pos='upper right',
-                    y_low=None, y_high=None):
-    """
-    Erstellt einen Plot und speichert ihn in einem Dateiformat.
-
-    Parameter:
-        x_data_list (list of lists): Die Liste von x-Werten für jede Datenreihe.
-        y_data_list (list of lists): Die Liste von y-Werten für jede Datenreihe.
-        title (str): Der Titel des Plots (Standard: leer).
-        x_label (str): Die Beschriftung der x-Achse (Standard: leer).
-        y_label (str): Die Beschriftung der y-Achse (Standard: leer).
-        x_scale (str): Die Skala der x-Achse (Standard: 'linear').
-        y_scale (str): Die Skala der y-Achse (Standard: 'linear').
-        x_ticks (list): Benutzerdefinierte x-Ticks (Standard: None).
-        y_ticks (list): Benutzerdefinierte y-Ticks (Standard: None).
-        font_size (int): Die Schriftgröße für Titel und Achsenbeschriftungen (Standard: 12).
-        file_path (str): Der Ordner, in dem der Plot gespeichert werden soll (Standard: '').
-        file_name (str): Der Dateiname, unter dem der Plot gespeichert werden soll (Standard: 'plot.png').
-        dpi (int): Die Auflösung des gespeicherten Plots in DPI (Standard: 300).
-        figsize (tuple): Die Größe des Plots in Zoll (Standard: (8, 6)).
-        line_styles (list): Die Linienstile für jede Datenreihe (Standard: None).
-        colors (list): Die Farben für jede Datenreihe (Standard: None).
-        labels (list): Die Legendenbeschriftungen für jede Datenreihe (Standard: None).
-        moving_average (bool): Gibt an, ob der gleitende Durchschnitt dargestellt werden soll (Standard: False).
-        ma_interval (int): Das Intervall für den gleitenden Durchschnitt (Standard: 1, d.h. kein Durchschnitt).
-
-    Rückgabe:
-        None
-    """
-    # Erstelle eine neue Figur und Achsen
-    plt.figure(figsize=figsize)
-    ax = plt.gca()
-
-    # plt.rcParams['text.usetex'] = True
-    plt.rcParams['font.size'] = fsize
-    # plt.rcParams['font.family'] = 'Times New Roman'
-    plt.rcParams.update({
-        'text.usetex': True,
-        'font.family': 'serif',
-        'font.serif': ['Times']})
-    plt.rcParams['legend.fontsize'] = tsize
-    plt.rcParams['xtick.direction'] = tdir
-    plt.rcParams['ytick.direction'] = tdir
-    plt.rcParams['xtick.labelsize'] = tsize
-    plt.rcParams['ytick.labelsize'] = tsize
-    # plt.rcParams['xtick.major.size'] = tsize
-    # plt.rcParams['xtick.minor.size'] = tsize
-    # plt.rcParams['ytick.major.size'] = major
-    # plt.rcParams['ytick.minor.size'] = minor
-
-    # Setze die Achsenskalen
-    ax.set_xscale(x_scale)
-    ax.set_yscale(y_scale)
-    if y_low is not None:
-        ax.set_ylim(y_low, y_high)
-
-    # Benutzerdefinierte x-Ticks
-    if x_ticks:
-        ax.set_xticks(x_ticks)
-
-    # Benutzerdefinierte y-Ticks
-    if y_ticks:
-        ax.set_yticks(y_ticks)
-
-    # Setze die Schriftgröße für Titel und Achsenbeschriftungen
-    plt.title(title, fontsize=font_size)
-    plt.xlabel(x_label, fontsize=font_size)
-    plt.ylabel(y_label, fontsize=font_size)
-
-    # Plotten der Datenreihen
-    if line_styles is None:
-        line_styles = ['-'] * len(x_data_list)
-
-    if colors is None:
-        colors = [None] * len(x_data_list)
-
-    log = []
-    for i, (x_data, y_data) in enumerate(zip(x_data_list, y_data_list)):
-        label = labels[i] if labels else f"Datenreihe {i + 1}"
-        # plt.plot(x_data, y_data, label=label, linestyle=line_styles[i], color=colors[i])
-
-        # Plot des gleitenden Durchschnitts (falls aktiviert)
-        if moving_average and ma_interval > 1 and len(y_data) >= ma_interval:
-            moving_avg = np.convolve(y_data, np.ones(ma_interval) / ma_interval, mode='valid')
-            ma_x_data = x_data[ma_interval // 2:-(ma_interval // 2)]
-            plt.plot(ma_x_data, moving_avg, label=label, linestyle=line_styles[i],
-                     color=colors[i], alpha=0.7)
-            log.append(moving_avg)
-
-    #with open(file_path+file_name+'moving_avg.txt', 'w') as file:
-    #    for data in log:
-    #        file.write(str(data[-30:]) + '\n')
-
-    # Legende anzeigen
-    if labels:
-        plt.legend(loc=leg_pos, prop={
-            'family': 'Helvetica'})
-
-    # plt.ylim([y_low, y_high])
-
-    # Speichern des Plots
-    plt.savefig(file_path + file_name + '.png', format='png', dpi=dpi)
-    plt.savefig(file_path + file_name + '.svg', format='svg', dpi=dpi)
-    # plt.savefig(file_path + file_name, format='png', dpi=dpi)
-
-    # Zeige den Plot an (optional)
-    # plt.show()
-
-    # Schließe die Figur
-    plt.close()
-
-
-# Beispiel:
-
-
-Experimente = [
-    'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_8_kmeans/3_sparse_8_kmeans_1/events.out.tfevents.1717196323.DESKTOP-6FHK9F7.8532.9',
-    'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_8_neighbour/3_sparse_8_neighbour_1/events.out.tfevents.1717202642.DESKTOP-6FHK9F7.8532.10',
-    'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_8_no_cluster/3_sparse_8_no_cluster_1/events.out.tfevents.1717205357.DESKTOP-6FHK9F7.8532.11']
-
-#names = [r'$Kmeans$', r'$KNN$', r'$No Cluster$']
-names = [r'Kmeans', r'KNN', r'No Cluster']
-x_rew = []
-y_rew = []
-x_diff = []
-y_diff = []
-x_tard = []
-y_tard = []
-
-
-for i in range(len(names)):
-    d = {}
-    for event in summary_iterator(Experimente[i]):
-        for value in event.summary.value:
-            # print(value.tag)
-            if value.HasField('simple_value'):
-                if value.tag in d.keys():
-                    d[value.tag].append(value.simple_value)
-                else:
-                    d.update({str(value.tag): [value.simple_value]})
-                    # print(value.simple_value)
-    # print(d)
-    df = pd.DataFrame.from_dict(d, orient='index')
-    df = df.transpose()
-
-    x_rew.append(list(df['rollout/ep_rew_mean'].index.values))
-    y_rew.append(df['rollout/ep_rew_mean'].to_list())
-    x_diff.append(list(df['workload_gap'].index.values))
-    y_diff.append(df['workload_gap'].to_list())
-    x_tard.append(list(df['deadline_gap'].index.values))
-    y_tard.append(df['deadline_gap'].to_list())
-    '''
-
-    x1_0.append(df['Dlz/Typ1'].index.values)
-    y1_1 = (df['Dlz/Typ1'].to_list())
-    y1_2 = (df['Dlz/Typ2'].to_list())
-    y1_3 = (df['Dlz/Typ3'].to_list())
-    y1_4 = (df['Dlz/Typ4'].to_list())
-    y1_5 = (df['Dlz/Typ5'].to_list())
-    tmp = np.array([y1_1, y1_2, y1_3, y1_4, y1_5])
-    y1_0.append(np.average(tmp, axis=0))'''
-
-# print(x_rew)
-# print(y_rew)
-
-
-# names = ['$RAM$', '$RWM$', '$RAP$', '$RWP$']
-
+names = ['Kmeans', 'KNN', 'Ohne Cluster']
+num_dict = {
+    '_8': 'acht',
+    '_12': 'zwölf',
+    '_15': '15'
+}
 fenster = 31
 linestyle = ['solid', 'solid', 'solid']
 colors = ['tab:blue', 'tab:red', 'tab:green']
+#base_directory = 'isri_optimizer/rl_sequential_agent/savefiles_Train1'
+#event_file_paths = find_event_files_dict(base_directory) #erzeigt den dict Experimente
 
+Experimente = {'sparse': {'_8': ['isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_8_kmeans/3_sparse_8_kmeans_1/events.out.tfevents.1717196323.DESKTOP-6FHK9F7.8532.9', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_8_neighbour/3_sparse_8_neighbour_1/events.out.tfevents.1717202642.DESKTOP-6FHK9F7.8532.10', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_8_no_cluster/3_sparse_8_no_cluster_1/events.out.tfevents.1717205357.DESKTOP-6FHK9F7.8532.11'], 
+            '_12': ['isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_12_kmeans/3_sparse_12_kmeans_1/events.out.tfevents.1717207499.DESKTOP-6FHK9F7.8532.12', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_12_neighbour/3_sparse_12_neighbour_1/events.out.tfevents.1717213907.DESKTOP-6FHK9F7.8532.13', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_12_no_cluster/3_sparse_12_no_cluster_1/events.out.tfevents.1717216667.DESKTOP-6FHK9F7.8532.14'], 
+            '_15': ['isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_15_kmeans/3_sparse_15_kmeans_1/events.out.tfevents.1717218861.DESKTOP-6FHK9F7.8532.15', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_15_neighbour/3_sparse_15_neighbour_1/events.out.tfevents.1717225309.DESKTOP-6FHK9F7.8532.16', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_15_no_cluster/3_sparse_15_no_cluster_1/events.out.tfevents.1717228124.DESKTOP-6FHK9F7.8532.17']}, 
+'dense': {'_8': ['isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_dense_8_kmeans/3_dense_8_kmeans_1/events.out.tfevents.1717276975.DESKTOP-6FHK9F7.2584.0', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_dense_8_neighbour/3_dense_8_neighbour_1/events.out.tfevents.1717285774.DESKTOP-6FHK9F7.2584.2', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_dense_8_no_cluster/3_dense_8_no_cluster_1/events.out.tfevents.1717283569.DESKTOP-6FHK9F7.2584.1'], 
+          '_12': ['isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_dense_12_kmeans/3_dense_12_kmeans_1/events.out.tfevents.1717288546.DESKTOP-6FHK9F7.2584.3', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_dense_12_neighbour/3_dense_12_neighbour_1/events.out.tfevents.1717297201.DESKTOP-6FHK9F7.2584.5', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_dense_12_no_cluster/3_dense_12_no_cluster_1/events.out.tfevents.1717294960.DESKTOP-6FHK9F7.2584.4'], 
+          '_15': ['isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_dense_15_kmeans/3_dense_15_kmeans_1/events.out.tfevents.1717300027.DESKTOP-6FHK9F7.2584.6', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_dense_15_neighbour/3_dense_15_neighbour_1/events.out.tfevents.1717308779.DESKTOP-6FHK9F7.2584.8', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_dense_15_no_cluster/3_dense_15_no_cluster_1/events.out.tfevents.1717306509.DESKTOP-6FHK9F7.2584.7']}, 
+'sparse_sum': {'_8': ['isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_8_kmeans/3_sparse_sum_8_kmeans_1/events.out.tfevents.1717327636.DESKTOP-6FHK9F7.12692.0', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_8_neighbour/3_sparse_sum_8_neighbour_1/events.out.tfevents.1717336377.DESKTOP-6FHK9F7.12692.2', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_8_no_cluster/3_sparse_sum_8_no_cluster_1/events.out.tfevents.1717334152.DESKTOP-6FHK9F7.12692.1'], 
+               '_12': ['isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_12_kmeans/3_sparse_sum_12_kmeans_1/events.out.tfevents.1717339184.DESKTOP-6FHK9F7.12692.3', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_12_neighbour/3_sparse_sum_12_neighbour_1/events.out.tfevents.1717347924.DESKTOP-6FHK9F7.12692.5', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_12_no_cluster/3_sparse_sum_12_no_cluster_1/events.out.tfevents.1717345597.DESKTOP-6FHK9F7.12692.4'], 
+               '_15': ['isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_15_kmeans/3_sparse_sum_15_kmeans_1/events.out.tfevents.1717350765.DESKTOP-6FHK9F7.12692.6', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_15_neighbour/3_sparse_sum_15_neighbour_1/events.out.tfevents.1717359505.DESKTOP-6FHK9F7.12692.8', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_15_no_cluster/3_sparse_sum_15_no_cluster_1/events.out.tfevents.1717357214.DESKTOP-6FHK9F7.12692.7']}}
 
-ergebnisse_plot(x_rew, y_rew, labels=names, title='Return bei acht Aktionen', file_name='Return8',
+data_sparse_8 = read_tensorflow_events(Experimente, 'sparse', '_8')
+
+for reward, values in Experimente.items():
+    print(reward)
+    for klassen, path in values.items():
+        print(klassen)
+        data = read_tensorflow_events(Experimente, reward, klassen)
+        ergebnisse_plot(data['x_rew'], data['y_rew'], labels=names, title=f'kummulierter Reward bei {num_dict[klassen]} Aktionen', file_name=f'Return{klassen}',
                 moving_average=True, ma_interval=fenster, line_styles=linestyle,
                 colors=colors, y_low=None, y_high=None,
-                x_label="Rollout", y_label="gemittelter Return",
-                leg_pos='lower right', file_path="isri_optimizer/rl_sequential_agent/plots/sparse/")
-
-
-ergebnisse_plot(x_diff, y_diff, labels=names, title='Vergleich der Auslastung bei acht Aktionen', file_name='Diffsum8',
+                x_label="Trainings-Iterationen", y_label="Return",
+                leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
+        
+        ergebnisse_plot(data['x_diff'], data['y_diff'], labels=names, title=f'Vergleich der Auslastung bei {num_dict[klassen]} Aktionen', file_name=f'Diffsum{klassen}',
                 moving_average=True, ma_interval=fenster, line_styles=linestyle,
                 colors=colors, y_low=None, y_high=None,
-                x_label="Rollout",
-                y_label="Diffsum Unterschied zum GA",
-                leg_pos='lower right', file_path="isri_optimizer/rl_sequential_agent/plots/sparse/")
-
-ergebnisse_plot(x_tard, y_tard, labels=names, title='Vergleich der Termintreue bei acht Aktionen', file_name='Tardiness8',
+                x_label="Trainings-Iterationen", y_label="Relative Abweichung zur Baseline",
+                leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
+        
+        ergebnisse_plot(data['x_tard'], data['y_tard'], labels=names, title=f'Vergleich der Termintreue bei {num_dict[klassen]} Aktionen', file_name=f'Tardiness{klassen}',
                 moving_average=True, ma_interval=fenster, line_styles=linestyle,
                 colors=colors, y_low=None, y_high=None,
-                x_label="Rollout",
-                y_label="Tardiness Unterschied zum GA",
-                leg_pos='lower right', file_path="isri_optimizer/rl_sequential_agent/plots/sparse/")
+                x_label="Trainings-Iterationen", y_label="Relative Abweichung zur Baseline",
+                leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
+
 
 
 '''

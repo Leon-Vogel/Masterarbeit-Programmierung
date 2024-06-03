@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+from tensorflow.python.summary.summary_iterator import summary_iterator
+import pandas as pd
 
 def ergebnisse_plot(x_data_list, y_data_list, title="", x_label="", y_label="",
                     x_scale='linear', y_scale='linear',
@@ -9,27 +11,21 @@ def ergebnisse_plot(x_data_list, y_data_list, title="", x_label="", y_label="",
                     line_styles=None, colors=None, labels=None,
                     moving_average=False, ma_interval=1, leg_pos='upper right',
                     y_low=None, y_high=None):
-    #plt.style.use('science')
+
     plt.rcParams.update({
         'font.size': font_size,
         'legend.fontsize': font_size,
         'xtick.labelsize': font_size,
-        'ytick.labelsize': font_size
+        'ytick.labelsize': font_size,
+        'font.family': 'Times New Roman'
     })
-    plt.rcParams['font.family'] = 'Times New Roman'
-    '''plt.rcParams.update({
-        'text.usetex': True,
-        'font.family': 'serif',
-        'font.serif': ['Times']})'''
-
-
+    #plt.rcParams['font.family'] = 'Times New Roman'
     plt.figure(figsize=figsize)
     ax = plt.gca()
 
     ax.set_xscale(x_scale)
     ax.set_yscale(y_scale)
-    if y_low is not None:
-        ax.set_ylim(y_low, y_high)
+    
 
     # Benutzerdefinierte x-Ticks
     if x_ticks:
@@ -45,6 +41,7 @@ def ergebnisse_plot(x_data_list, y_data_list, title="", x_label="", y_label="",
     plt.ylabel(y_label, fontsize=font_size)
 
     plt.subplots_adjust(left=0.15, bottom=0.15)
+    ax.grid(True)
 
     # Plotten der Datenreihen
     if line_styles is None:
@@ -65,7 +62,13 @@ def ergebnisse_plot(x_data_list, y_data_list, title="", x_label="", y_label="",
             plt.plot(ma_x_data, moving_avg, label=label, linestyle=line_styles[i],
                      color=colors[i], alpha=0.7)
             log.append(moving_avg)
-
+            
+    if y_low is not None or y_high is not None:
+        ax.set_ylim(y_low, y_high)
+    else:
+        current_y_limits = ax.get_ylim()
+        if current_y_limits[1] < 0:
+            ax.set_ylim(bottom=current_y_limits[0], top=0)
     # Legende anzeigen
     if labels:
         plt.legend(loc=leg_pos, prop={'size': font_size})
@@ -73,9 +76,8 @@ def ergebnisse_plot(x_data_list, y_data_list, title="", x_label="", y_label="",
     # Speichern des Plots
     plt.savefig(file_path + file_name + '.png', format='png', dpi=dpi)
     plt.savefig(file_path + file_name + '.svg', format='svg', dpi=dpi)
-
-    # Schließe die Figur
     plt.close()
+
 
 
 def find_event_files(base_dir):
@@ -84,12 +86,76 @@ def find_event_files(base_dir):
         for file in files:
             if file.startswith("events.out.tfevents."):
                 full_path = os.path.join(root, file)
-                event_files.append(full_path)
+                normalized_path = os.path.normpath(full_path).replace(os.sep, '/')
+                event_files.append(normalized_path)
     return event_files
 
-# Beispielverwendung:
-base_directory = 'isri_optimizer/rl_sequential_agent/savefiles_Train1'
-event_file_paths = find_event_files(base_directory)
 
-for path in event_file_paths:
-    print(path)
+def find_event_files_dict(base_dir):
+    event_files = {
+        'sparse': {'_8': [], '_12': [], '_15': []},
+        'dense': {'_8': [], '_12': [], '_15': []},
+        'sparse_sum': {'_8': [], '_12': [], '_15': []}
+    }
+
+    for root, dirs, files in os.walk(base_dir):
+        for file in files:
+            if file.startswith("events.out.tfevents."):
+                full_path = os.path.join(root, file)
+                # Normalisiere den Pfad und ersetze \ durch /
+                normalized_path = os.path.normpath(full_path).replace(os.sep, '/')
+
+                # Finde das Stichwort und die Zahl im Pfad in einer bestimmten Reihenfolge
+                if 'sparse_sum' in normalized_path:
+                    for suffix in event_files['sparse_sum']:
+                        if suffix in normalized_path:
+                            event_files['sparse_sum'][suffix].append(normalized_path)
+                            break
+                elif 'sparse' in normalized_path:
+                    for suffix in event_files['sparse']:
+                        if suffix in normalized_path:
+                            event_files['sparse'][suffix].append(normalized_path)
+                            break
+                elif 'dense' in normalized_path:
+                    for suffix in event_files['dense']:
+                        if suffix in normalized_path:
+                            event_files['dense'][suffix].append(normalized_path)
+                            break
+
+    return event_files
+
+def read_tensorflow_events(event_files, keyword, suffix):
+    data = {
+        'x_rew': [],
+        'y_rew': [],
+        'x_diff': [],
+        'y_diff': [],
+        'x_tard': [],
+        'y_tard': []
+    }
+
+    files = event_files.get(keyword, {}).get(suffix, [])
+    for file in files:
+        d = {}
+        for event in summary_iterator(file):
+            for value in event.summary.value:
+                if value.HasField('simple_value'):
+                    if value.tag in d.keys():
+                        d[value.tag].append(value.simple_value)
+                    else:
+                        d.update({str(value.tag): [value.simple_value]})
+        df = pd.DataFrame.from_dict(d, orient='index').transpose()
+        
+        if 'rollout/ep_rew_mean' in df.columns:
+            data['x_rew'].append(list(df['rollout/ep_rew_mean'].index.values))
+            data['y_rew'].append(df['rollout/ep_rew_mean'].to_list())
+        
+        if 'workload_gap' in df.columns:
+            data['x_diff'].append(list(df['workload_gap'].index.values))
+            data['y_diff'].append(df['workload_gap'].to_list())
+        
+        if 'deadline_gap' in df.columns:
+            data['x_tard'].append(list(df['deadline_gap'].index.values))
+            data['y_tard'].append(df['deadline_gap'].to_list())
+    
+    return data
