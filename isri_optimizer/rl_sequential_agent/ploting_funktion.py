@@ -86,7 +86,6 @@ def ergebnisse_subplot(x_data_list, y_data_list, titles, sup_title, x_label, y_l
                        line_styles=None, colors=None, labels=None, 
                        moving_average=False, ma_interval=1, leg_pos='upper right', 
                        y_low=None, y_high=None):
-    plot_n=0
     plt.rcParams.update({
         'font.size': font_size,
         'legend.fontsize': font_size,
@@ -96,13 +95,12 @@ def ergebnisse_subplot(x_data_list, y_data_list, titles, sup_title, x_label, y_l
     })
 
     fig, axs = plt.subplots(len(x_data_list), 1, figsize=figsize, sharex=True)
-    
-    for ax, x_data, y_data, title, y_label in zip(axs, x_data_list, y_data_list, titles, y_labels):
-        plot_n += 1
+
+    for plot_n, (ax, x_data, y_data, title, y_label) in enumerate(zip(axs, x_data_list, y_data_list, titles, y_labels), start=1):
         ax.set_xscale(x_scale)
         ax.set_yscale(y_scale)
         ax.grid(True)
-        
+
         if x_ticks:
             ax.set_xticks(x_ticks)
         if y_ticks:
@@ -110,19 +108,19 @@ def ergebnisse_subplot(x_data_list, y_data_list, titles, sup_title, x_label, y_l
 
         ax.set_title(title, fontsize=font_size)
         ax.set_ylabel(y_label, fontsize=font_size)
-        
+
         if y_low is not None or y_high is not None:
             ax.set_ylim(y_low, y_high)
         else:
             current_y_limits = ax.get_ylim()
             if current_y_limits[1] < 0:
                 ax.set_ylim(bottom=current_y_limits[0], top=0)
-        
+
         if line_styles is None:
             line_styles = ['-'] * len(x_data)
         if colors is None:
             colors = [None] * len(x_data)
-        
+
         for i, (x, y) in enumerate(zip(x_data, y_data)):
             label = labels[i] if labels else f"Datenreihe {i + 1}"
             if moving_average and ma_interval > 1 and len(y) >= ma_interval:
@@ -141,12 +139,12 @@ def ergebnisse_subplot(x_data_list, y_data_list, titles, sup_title, x_label, y_l
 
         if labels and plot_n==1:
             ax.legend(loc=leg_pos, prop={'size': font_size})
-    
+
     axs[-1].set_xlabel(x_label, fontsize=font_size)
     fig.suptitle(sup_title, fontsize=font_size)
 
     plt.tight_layout()
-    
+
     plt.savefig(file_path + file_name + '.png', format='png', dpi=dpi)
     plt.savefig(file_path + file_name + '.svg', format='svg', dpi=dpi)
     plt.close()
@@ -212,22 +210,23 @@ def read_tensorflow_events(event_files, keyword, suffix):
         for event in summary_iterator(file):
             for value in event.summary.value:
                 if value.HasField('simple_value'):
-                    if value.tag in d.keys():
+                    if value.tag in d:
                         d[value.tag].append(value.simple_value)
                     else:
-                        d.update({str(value.tag): [value.simple_value]})
+                        d[str(value.tag)] = [value.simple_value]
         df = pd.DataFrame.from_dict(d, orient='index').transpose()
-        
+
         if 'rollout/ep_rew_mean' in df.columns:
             data['x_rew'].append(list(df['rollout/ep_rew_mean'].index.values))
             data['y_rew'].append(df['rollout/ep_rew_mean'].to_list())
-        
+
         if 'workload_gap' in df.columns:
             data['x_diff'].append(list(df['workload_gap'].index.values))
             data['y_diff'].append(df['workload_gap'].to_list())
-        
+
         if 'deadline_gap' in df.columns:
             data['x_tard'].append(list(df['deadline_gap'].index.values))
             data['y_tard'].append(df['deadline_gap'].to_list())
-    
+
     return data
+

@@ -1,3 +1,4 @@
+# sourcery skip: remove-redundant-fstring
 from _dir_init import *
 from isri_optimizer.rl_sequential_agent.environment import IsriEnv
 from isri_optimizer.rl_sequential_agent.environment_no_cluster import IsriEnv_no_cluster
@@ -45,6 +46,7 @@ def linear_schedule(initial_value: float) -> Callable[[float], float]:
 
     return func
 
+# sourcery skip: dict-assign-update-to-union
 env_config = {
     "jpl": 20,  # Example values, please adjust according to your needs
     "conv_speed": 208,
