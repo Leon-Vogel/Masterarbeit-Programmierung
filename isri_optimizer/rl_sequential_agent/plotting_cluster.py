@@ -1,3 +1,4 @@
+import copy
 import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -67,7 +68,7 @@ def plot_elbow_method(k_range, values, xlabel, ylabel, title, file_path, file_na
     plt.savefig(f"{file_path}{file_name}_{file_suffix}.svg", format='svg', dpi=dpi)
     plt.close()
 
-def plot_hist(all_labels, bins, xlabel, ylabel, title, file_path, file_name, file_suffix, font_size=7, dpi=500, fig_size=None):
+def plot_hist(all_labels, bins, xlabel, ylabel, title, file_path, file_name, file_suffix, font_size=7, dpi=500, fig_size=None, grid=True):
     all_labels = [x + 1 for x in all_labels]
     if fig_size is None:
         fig_size = [4, 3]
@@ -88,6 +89,10 @@ def plot_hist(all_labels, bins, xlabel, ylabel, title, file_path, file_name, fil
     plt.ylabel(ylabel)
     plt.title(title, fontsize=font_size) #, pad=10
     plt.subplots_adjust(left=0.15, bottom=0.15)
+    if grid:
+        ax = plt.gca()
+        ax.grid(True)
+        ax.set_axisbelow(True) 
     plt.savefig(f"{file_path}{file_name}_{file_suffix}.png", format='png', dpi=dpi)
     plt.savefig(f"{file_path}{file_name}_{file_suffix}.svg", format='svg', dpi=dpi)
     plt.close()
@@ -109,7 +114,7 @@ if plot_cluster_metrics:
             plot_elbow_method(K, data[i], 'Anzahl der Klassen', Achsen[i], Titel[i], 
                         'isri_optimizer/rl_sequential_agent/plots/data/', Methode, datei_endung[i])
 
-plot_cluster_count = True
+plot_cluster_count = False
 if plot_cluster_count:
     GA_SOLUTIONS_PATH = "./isri_optimizer/rl_sequential_agent/IsriDataset.pkl"
     path="./isri_optimizer/rl_sequential_agent/cluster_models/"
@@ -132,7 +137,28 @@ if plot_cluster_count:
                 plot_hist(all_labels, i, 'Klassen', 'Anzahl Produkte einer Klasse', f'Häufigkeit der Klassen für {Namen[counter]} Clustering', 
                           'isri_optimizer/rl_sequential_agent/plots/data/count/', f'{Methode}_Count', f'n{i}')
 
-
+plot_GA_solution = True
+if plot_GA_solution:
+    GA_SOLUTIONS_PATH = "./isri_optimizer/rl_sequential_agent/IsriDataset.pkl"
+    isri_dataset = pickle.load(open(GA_SOLUTIONS_PATH, 'rb'))
+    shift_record = pd.DataFrame()
+    for i in range(len(isri_dataset.data['GAChromosome'])):
+        keys_list = isri_dataset.data['GAChromosome'][i]
+        keys_list = keys_list.tolist()
+        data = copy.deepcopy(isri_dataset.data['Jobdata'][i])
+        shifts = {}
+        for key in keys_list:
+            if key in data:
+                original_index = list(data.keys()).index(key)
+                shift = original_index
+                shifts[key] = shift
+                del data[key] 
+        df = pd.DataFrame.from_dict(shifts, orient='index')
+        shift_record = pd.concat([shift_record, df], ignore_index=True)
+    data = shift_record.values.tolist()
+    data = np.array(data).flatten()
+    plot_hist(data, np.amax(data)+1, 'n dringendster Auftrag', 'Häufigkeit', 'Auswahl der n dringendsten Aufträge bei dem Genetischen Algorithmus', 
+                          'isri_optimizer/rl_sequential_agent/plots/data/', 'GA', 'dringlichkeit')
 
 
 
