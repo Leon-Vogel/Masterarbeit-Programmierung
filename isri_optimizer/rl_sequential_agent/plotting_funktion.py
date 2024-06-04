@@ -10,7 +10,7 @@ def ergebnisse_plot(x_data_list, y_data_list, title="", x_label="", y_label="",
                     file_name="plot.png", dpi=500, figsize=(4, 3),
                     line_styles=None, colors=None, labels=None,
                     moving_average=False, ma_interval=1, leg_pos='upper right',
-                    y_low=None, y_high=None):
+                    y_low=None, y_high=None, y_top=0):
 
     plt.rcParams.update({
         'font.size': font_size,
@@ -67,8 +67,8 @@ def ergebnisse_plot(x_data_list, y_data_list, title="", x_label="", y_label="",
         ax.set_ylim(y_low, y_high)
     else:
         current_y_limits = ax.get_ylim()
-        if current_y_limits[1] < 0:
-            ax.set_ylim(bottom=current_y_limits[0], top=0)
+        if current_y_limits[1] < y_top:
+            ax.set_ylim(bottom=current_y_limits[0], top=y_top)
     # Legende anzeigen
     if labels:
         plt.legend(loc=leg_pos, prop={'size': font_size})
@@ -201,7 +201,9 @@ def read_tensorflow_events(event_files, keyword, suffix):
         'x_diff': [],
         'y_diff': [],
         'x_tard': [],
-        'y_tard': []
+        'y_tard': [],
+        'x_expl_var': [],
+        'y_expl_var': []
     }
 
     files = event_files.get(keyword, {}).get(suffix, [])
@@ -227,6 +229,10 @@ def read_tensorflow_events(event_files, keyword, suffix):
         if 'deadline_gap' in df.columns:
             data['x_tard'].append(list(df['deadline_gap'].index.values))
             data['y_tard'].append(df['deadline_gap'].to_list())
+
+        if 'train/explained_variance' in df.columns:
+            data['x_expl_var'].append(list(df['train/explained_variance'].index.values))
+            data['y_expl_var'].append(df['train/explained_variance'].to_list())
 
     return data
 

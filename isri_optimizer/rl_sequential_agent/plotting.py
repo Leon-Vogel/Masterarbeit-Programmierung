@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 from tensorflow.python.summary.summary_iterator import summary_iterator
-from isri_optimizer.rl_sequential_agent.plotting_funktion import ergebnisse_plot, read_tensorflow_events, find_event_files_dict, ergebnisse_subplot
+from plotting_funktion import ergebnisse_plot, read_tensorflow_events, find_event_files_dict, ergebnisse_subplot
 
 names = ['Kmeans', 'KNN', 'Ohne Cluster']
 num_dict = {
@@ -30,7 +30,8 @@ Experimente = {'sparse': {'_8': ['isri_optimizer/rl_sequential_agent/savefiles_T
 data_sparse_8 = read_tensorflow_events(Experimente, 'sparse', '_8')
 
 normale_plots = False
-subplots = True
+explained_variance = True
+subplots = False
 
 for reward, values in Experimente.items():
     print(reward)
@@ -55,6 +56,14 @@ for reward, values in Experimente.items():
                         colors=colors, y_low=None, y_high=None,
                         x_label="Trainings-Iterationen", y_label="Relative Abweichung zur Baseline",
                         leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
+        if explained_variance:
+            ergebnisse_plot(data['x_expl_var'], data['y_expl_var'], labels=names, title=f'Relativer Fehler der Value Funktion bei {num_dict[klassen]} Aktionen', file_name=f'Explained_Variance{klassen}',
+                        moving_average=True, ma_interval=fenster, line_styles=linestyle,
+                        colors=colors, y_low=None, y_high=None,
+                        x_label="Trainings-Iterationen", y_label="Explained Variance",
+                        leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/', y_top=1)
+              
+
         if subplots:
                 titles = [
                     'kummulierter Reward',
