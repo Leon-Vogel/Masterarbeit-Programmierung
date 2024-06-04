@@ -62,7 +62,7 @@ def ergebnisse_plot(x_data_list, y_data_list, title="", x_label="", y_label="",
             plt.plot(ma_x_data, moving_avg, label=label, linestyle=line_styles[i],
                      color=colors[i], alpha=0.7)
             log.append(moving_avg)
-            
+
     if y_low is not None or y_high is not None:
         ax.set_ylim(y_low, y_high)
     else:
@@ -78,6 +78,78 @@ def ergebnisse_plot(x_data_list, y_data_list, title="", x_label="", y_label="",
     plt.savefig(file_path + file_name + '.svg', format='svg', dpi=dpi)
     plt.close()
 
+
+def ergebnisse_subplot(x_data_list, y_data_list, titles, sup_title, x_label, y_labels, 
+                       x_scale='linear', y_scale='linear', 
+                       x_ticks=None, y_ticks=None, font_size=7, file_path="isri_optimizer/rl_sequential_agent/plots/", 
+                       file_name="subplot.png", dpi=500, figsize=(4, 5), 
+                       line_styles=None, colors=None, labels=None, 
+                       moving_average=False, ma_interval=1, leg_pos='upper right', 
+                       y_low=None, y_high=None):
+    plot_n=0
+    plt.rcParams.update({
+        'font.size': font_size,
+        'legend.fontsize': font_size,
+        'xtick.labelsize': font_size,
+        'ytick.labelsize': font_size,
+        'font.family': 'Times New Roman'
+    })
+
+    fig, axs = plt.subplots(len(x_data_list), 1, figsize=figsize, sharex=True)
+    
+    for ax, x_data, y_data, title, y_label in zip(axs, x_data_list, y_data_list, titles, y_labels):
+        plot_n += 1
+        ax.set_xscale(x_scale)
+        ax.set_yscale(y_scale)
+        ax.grid(True)
+        
+        if x_ticks:
+            ax.set_xticks(x_ticks)
+        if y_ticks:
+            ax.set_yticks(y_ticks)
+
+        ax.set_title(title, fontsize=font_size)
+        ax.set_ylabel(y_label, fontsize=font_size)
+        
+        if y_low is not None or y_high is not None:
+            ax.set_ylim(y_low, y_high)
+        else:
+            current_y_limits = ax.get_ylim()
+            if current_y_limits[1] < 0:
+                ax.set_ylim(bottom=current_y_limits[0], top=0)
+        
+        if line_styles is None:
+            line_styles = ['-'] * len(x_data)
+        if colors is None:
+            colors = [None] * len(x_data)
+        
+        for i, (x, y) in enumerate(zip(x_data, y_data)):
+            label = labels[i] if labels else f"Datenreihe {i + 1}"
+            if moving_average and ma_interval > 1 and len(y) >= ma_interval:
+                moving_avg = np.convolve(y, np.ones(ma_interval) / ma_interval, mode='valid')
+                ma_x_data = x[ma_interval // 2:-(ma_interval // 2)]
+                ax.plot(ma_x_data, moving_avg, label=label, linestyle=line_styles[i], color=colors[i], alpha=0.7)
+            else:
+                ax.plot(x, y, label=label, linestyle=line_styles[i], color=colors[i])
+
+        if y_low is not None or y_high is not None:
+            ax.set_ylim(y_low, y_high)
+        else:
+            current_y_limits = ax.get_ylim()
+            if current_y_limits[1] < 0:
+                ax.set_ylim(bottom=current_y_limits[0], top=0)
+
+        if labels and plot_n==1:
+            ax.legend(loc=leg_pos, prop={'size': font_size})
+    
+    axs[-1].set_xlabel(x_label, fontsize=font_size)
+    fig.suptitle(sup_title, fontsize=font_size)
+
+    plt.tight_layout()
+    
+    plt.savefig(file_path + file_name + '.png', format='png', dpi=dpi)
+    plt.savefig(file_path + file_name + '.svg', format='svg', dpi=dpi)
+    plt.close()
 
 
 def find_event_files(base_dir):
