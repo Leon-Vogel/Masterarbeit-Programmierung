@@ -12,7 +12,7 @@ from sklearn.cluster import KMeans
 import torch as th
 from itertools import product
 from typing import Callable
-from data_split import train_test
+from data_split import train_test, TrainTest
 
 
 SAVE_FREQUENCY = 100_000
@@ -21,12 +21,14 @@ MODEL_SAVE_DIR = f"./isri_optimizer/rl_sequential_agent/savefiles_Train1/"
 JOBDATA_DIR = './isri_optimizer/instances/'
 SAVEFILE = f"./isri_optimizer/rl_sequential_agent/savefiles_Train1/_best_chromosome"
 N_TRAINING_INSTANCES = 500
-GA_SOLUTIONS_PATH = "./isri_optimizer/rl_sequential_agent/IsriDataset.pkl" #ToDo: Muss diese Datei auch aktualisiert werden?
+GA_SOLUTIONS_PATH = "./isri_optimizer/rl_sequential_agent/IsriDataset.pkl" 
 N_TRIES = 1
 
-data = train_test(min_length=20, max_length=100, path=GA_SOLUTIONS_PATH, N_TRAINING_INSTANCES=N_TRAINING_INSTANCES ,all_data=True, save=True)
+data = TrainTest(min_length=20, max_length=100, path=GA_SOLUTIONS_PATH, N_TRAINING_INSTANCES=N_TRAINING_INSTANCES ,all_data=True, save=True)
+isri_dataset, isri_dataset_test = data.get_data() #data.get_mixed_data() für Instanzen mit gemischter größe
+#data = train_test(min_length=20, max_length=100, path=GA_SOLUTIONS_PATH, N_TRAINING_INSTANCES=N_TRAINING_INSTANCES ,all_data=True, save=True)
 # isri_dataset, test_dataset = data.get_mixed_data() #für unterschiedlich große Instanzen
-isri_dataset, isri_dataset_test = data.get_data() #für gleichgroße Instanzen
+#isri_dataset, isri_dataset_test = data.get_data() #für gleichgroße Instanzen
 # Loading instances and creating config
 #isri_dataset = pickle.load(open(GA_SOLUTIONS_PATH, 'rb'))
 #isri_dataset.data['Jobdata'] = isri_dataset.data['Jobdata'][:N_TRAINING_INSTANCES]

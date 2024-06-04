@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 from tensorflow.python.summary.summary_iterator import summary_iterator
-from ploting_funktion import ergebnisse_plot, read_tensorflow_events, find_event_files_dict, ergebnisse_subplot
+from isri_optimizer.rl_sequential_agent.plotting_funktion import ergebnisse_plot, read_tensorflow_events, find_event_files_dict, ergebnisse_subplot
 
 names = ['Kmeans', 'KNN', 'Ohne Cluster']
 num_dict = {
@@ -29,38 +29,44 @@ Experimente = {'sparse': {'_8': ['isri_optimizer/rl_sequential_agent/savefiles_T
 
 data_sparse_8 = read_tensorflow_events(Experimente, 'sparse', '_8')
 
+normale_plots = False
+subplots = True
+
 for reward, values in Experimente.items():
     print(reward)
     for klassen, path in values.items():
         print(klassen)
         data = read_tensorflow_events(Experimente, reward, klassen)
-        '''ergebnisse_plot(data['x_rew'], data['y_rew'], labels=names, title=f'kummulierter Reward bei {num_dict[klassen]} Aktionen', file_name=f'Return{klassen}',
-                moving_average=True, ma_interval=fenster, line_styles=linestyle,
-                colors=colors, y_low=None, y_high=None,
-                x_label="Trainings-Iterationen", y_label="Return",
-                leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
-        
-        ergebnisse_plot(data['x_diff'], data['y_diff'], labels=names, title=f'Vergleich der Auslastung bei {num_dict[klassen]} Aktionen', file_name=f'Diffsum{klassen}',
-                moving_average=True, ma_interval=fenster, line_styles=linestyle,
-                colors=colors, y_low=None, y_high=None,
-                x_label="Trainings-Iterationen", y_label="Relative Abweichung zur Baseline",
-                leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
-        
-        ergebnisse_plot(data['x_tard'], data['y_tard'], labels=names, title=f'Vergleich der Termintreue bei {num_dict[klassen]} Aktionen', file_name=f'Tardiness{klassen}',
-                moving_average=True, ma_interval=fenster, line_styles=linestyle,
-                colors=colors, y_low=None, y_high=None,
-                x_label="Trainings-Iterationen", y_label="Relative Abweichung zur Baseline",
-                leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')'''
-        
-        titles = [f'kummulierter Reward', 
-          f'Vergleich der Auslastung', 
-          f'Vergleich der Termintreue']
-        y_labels = ["Return", "Relative Abweichung zur Baseline", "Relative Abweichung zur Baseline"]
-        ergebnisse_subplot([data['x_rew'], data['x_diff'], data['x_tard']], [data['y_rew'], data['y_diff'], data['y_tard']], 
-                            titles=titles, sup_title=f'Ergebnisse bei {num_dict[klassen]} Aktionen', x_label="Trainings-Iterationen", y_labels=y_labels, labels=names, moving_average=True, 
-                            ma_interval=fenster, line_styles=linestyle, colors=colors, y_low=None, y_high=None, leg_pos='lower right', 
-                            file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/', file_name=f'subplots_{klassen}'
-                        )
+        if normale_plots:
+                ergebnisse_plot(data['x_rew'], data['y_rew'], labels=names, title=f'kummulierter Reward bei {num_dict[klassen]} Aktionen', file_name=f'Return{klassen}',
+                        moving_average=True, ma_interval=fenster, line_styles=linestyle,
+                        colors=colors, y_low=None, y_high=None,
+                        x_label="Trainings-Iterationen", y_label="Return",
+                        leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
+
+                ergebnisse_plot(data['x_diff'], data['y_diff'], labels=names, title=f'Vergleich der Auslastung bei {num_dict[klassen]} Aktionen', file_name=f'Diffsum{klassen}',
+                        moving_average=True, ma_interval=fenster, line_styles=linestyle,
+                        colors=colors, y_low=None, y_high=None,
+                        x_label="Trainings-Iterationen", y_label="Relative Abweichung zur Baseline",
+                        leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
+
+                ergebnisse_plot(data['x_tard'], data['y_tard'], labels=names, title=f'Vergleich der Termintreue bei {num_dict[klassen]} Aktionen', file_name=f'Tardiness{klassen}',
+                        moving_average=True, ma_interval=fenster, line_styles=linestyle,
+                        colors=colors, y_low=None, y_high=None,
+                        x_label="Trainings-Iterationen", y_label="Relative Abweichung zur Baseline",
+                        leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
+        if subplots:
+                titles = [
+                    'kummulierter Reward',
+                    'Vergleich der Auslastung',
+                    'Vergleich der Termintreue',
+                ]
+                y_labels = ["Return", "Relative Abweichung zur Baseline", "Relative Abweichung zur Baseline"]
+                ergebnisse_subplot([data['x_rew'], data['x_diff'], data['x_tard']], [data['y_rew'], data['y_diff'], data['y_tard']], 
+                                    titles=titles, sup_title=f'Ergebnisse bei {num_dict[klassen]} Aktionen', x_label="Trainings-Iterationen", y_labels=y_labels, labels=names, moving_average=True, 
+                                    ma_interval=fenster, line_styles=linestyle, colors=colors, y_low=None, y_high=None, leg_pos='lower right', 
+                                    file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/', file_name=f'subplots_{klassen}'
+                                )
 
 
 

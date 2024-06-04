@@ -41,8 +41,7 @@ class cluster_kmeans():
     def label(self, data):
         data = np.array(data)
         data = data.reshape(1, -1)
-        labels = self.kmeans.predict(data)
-        return labels
+        return self.kmeans.predict(data)
 
 
 
@@ -97,5 +96,4 @@ class cluster_neighbour():
     def label(self, data):
         data = np.array(data)
         data = data.reshape(1, -1)
-        labels = self.knn_model.predict(data)
-        return labels
+        return self.knn_model.predict(data)
