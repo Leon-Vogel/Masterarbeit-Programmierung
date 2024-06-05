@@ -85,27 +85,26 @@ class train_test(): #Alte train test methode ohne laden der Daten
 
 
 class TrainTest:
-    def __init__(self, min_length=20, max_length=100, path="IsriDataDict.pkl", N_TRAINING_INSTANCES=500, all_data=False, save=False, load=False, load_path=""):
+    def __init__(self, min_length=20, max_length=100, path="IsriDataDict.pkl", N_INSTANCES=500, all_data=False, save=False, 
+                 load=False, load_index=1, save_path="isri_optimizer/rl_sequential_agent/datasets/"):
         self.min_length = min_length
         self.max_length = max_length
         self.GA_SOLUTIONS_PATH = path
         self.save = save
         self.load = load
-        self.load_path = load_path
+        self.load_index = load_index
+        self.save_path = save_path
         
-        if self.load:
-            with open(self.load_path, 'rb') as f:
-                self.isri_dataset = pickle.load(f)
-        else:
+        if not load:
             self.isri_dataset = pickle.load(open(self.GA_SOLUTIONS_PATH, 'rb'))
-        
-        self.all_jobdata_entries = self.isri_dataset.data['Jobdata']
-        if all_data:
-            self.all_indices = list(range(len(self.isri_dataset.data['Jobdata'])))
-        else:
-            self.all_indices = list(range(N_TRAINING_INSTANCES))
-        
-        self.train_indices, self.test_indices = train_test_split(self.all_indices, test_size=0.2, random_state=42) 
+
+            self.all_jobdata_entries = self.isri_dataset.data['Jobdata']
+            if all_data:
+                self.all_indices = list(range(len(self.isri_dataset.data['Jobdata'])))
+            else:
+                self.all_indices = list(range(N_INSTANCES))
+
+            self.train_indices, self.test_indices = train_test_split(self.all_indices, test_size=0.2, random_state=42) 
 
     def adjust_entry_length(self, entry):
         target_length = random.randint(self.min_length, self.max_length)
@@ -128,50 +127,71 @@ class TrainTest:
         return entry
 
     def _save_with_index(self, base_filename, data):
-        filename = f'{base_filename}.pkl'
         index = 1
+        filename = f'{self.save_path}{base_filename}_{index}.pkl'
         while os.path.exists(filename):
-            filename = f"{base_filename}_{index}.pkl"
             index += 1
+            filename = f"{self.save_path}{base_filename}_{index}.pkl"
         with open(filename, 'wb') as f:
             pickle.dump(data, f)
 
     def get_data(self):
-        isri_dataset_train = IsriDataset(data_size=len(self.train_indices), seq_len=20)
-        isri_dataset_test = IsriDataset(data_size=len(self.test_indices), seq_len=20)
+        if self.load:
+            if not os.path.exists(f"{self.save_path}train_dataset_{self.load_index}.pkl"):
+                print('Fehler beim Laden')
+                exit()
+            else:
+                with open(f"{self.save_path}train_dataset_{self.load_index}.pkl", 'rb') as f:
+                    isri_dataset_train = pickle.load(f)
+                with open(f"{self.save_path}test_dataset_{self.load_index}.pkl", 'rb') as f:
+                    isri_dataset_test = pickle.load(f)
 
-        isri_dataset_train.data['Jobdata'] = [self.isri_dataset.data['Jobdata'][i] for i in self.train_indices]
-        isri_dataset_train.data['Files'] = [self.isri_dataset.data['Files'][i] for i in self.train_indices]
-        isri_dataset_train.data['GAChromosome'] = [self.isri_dataset.data['GAChromosome'][i] for i in self.train_indices]
-        isri_dataset_train.data['GAFitness'] = [self.isri_dataset.data['GAFitness'][i] for i in self.train_indices]
+        else: 
+            isri_dataset_train = IsriDataset(data_size=len(self.train_indices), seq_len=20)
+            isri_dataset_test = IsriDataset(data_size=len(self.test_indices), seq_len=20)
 
-        isri_dataset_test.data['Jobdata'] = [self.isri_dataset.data['Jobdata'][i] for i in self.test_indices]
-        isri_dataset_test.data['Files'] = [self.isri_dataset.data['Files'][i] for i in self.test_indices]
-        isri_dataset_test.data['GAChromosome'] = [self.isri_dataset.data['GAChromosome'][i] for i in self.test_indices]
-        isri_dataset_test.data['GAFitness'] = [self.isri_dataset.data['GAFitness'][i] for i in self.test_indices]
+            isri_dataset_train.data['Jobdata'] = [self.isri_dataset.data['Jobdata'][i] for i in self.train_indices]
+            isri_dataset_train.data['Files'] = [self.isri_dataset.data['Files'][i] for i in self.train_indices]
+            isri_dataset_train.data['GAChromosome'] = [self.isri_dataset.data['GAChromosome'][i] for i in self.train_indices]
+            isri_dataset_train.data['GAFitness'] = [self.isri_dataset.data['GAFitness'][i] for i in self.train_indices]
 
-        if self.save:
-            self._save_with_index('train_dataset', isri_dataset_train)
-            self._save_with_index('test_dataset', isri_dataset_test)
+            isri_dataset_test.data['Jobdata'] = [self.isri_dataset.data['Jobdata'][i] for i in self.test_indices]
+            isri_dataset_test.data['Files'] = [self.isri_dataset.data['Files'][i] for i in self.test_indices]
+            isri_dataset_test.data['GAChromosome'] = [self.isri_dataset.data['GAChromosome'][i] for i in self.test_indices]
+            isri_dataset_test.data['GAFitness'] = [self.isri_dataset.data['GAFitness'][i] for i in self.test_indices]
+
+            if self.save:
+                self._save_with_index('train_dataset', isri_dataset_train)
+                self._save_with_index('test_dataset', isri_dataset_test)
 
         return isri_dataset_train, isri_dataset_test
 
     def get_mixed_data(self):
-        isri_dataset_train = IsriDataset(data_size=len(self.train_indices), seq_len=20)
-        isri_dataset_test = IsriDataset(data_size=len(self.test_indices), seq_len=20)
+        if self.load:
+            if not os.path.exists(f"{self.save_path}train_dataset_mixed_{self.load_index}.pkl"):
+                print('Fehler beim Laden')
+                exit()
+            else:
+                with open(f"{self.save_path}train_dataset_mixed_{self.load_index}.pkl", 'rb') as f:
+                    isri_dataset_train = pickle.load(f)
+                with open(f"{self.save_path}test_dataset_mixed_{self.load_index}.pkl", 'rb') as f:
+                    isri_dataset_test = pickle.load(f)
+        else:
+            isri_dataset_train = IsriDataset(data_size=len(self.train_indices), seq_len=20)
+            isri_dataset_test = IsriDataset(data_size=len(self.test_indices), seq_len=20)
 
-        isri_dataset_train.data = {'Jobdata': [self.adjust_entry_length(self.isri_dataset.data['Jobdata'][i]) for i in self.train_indices]}
-        isri_dataset_test.data = {'Jobdata': [self.adjust_entry_length(self.isri_dataset.data['Jobdata'][i]) for i in self.test_indices]}
+            isri_dataset_train.data = {'Jobdata': [self.adjust_entry_length(self.isri_dataset.data['Jobdata'][i]) for i in self.train_indices]}
+            isri_dataset_test.data = {'Jobdata': [self.adjust_entry_length(self.isri_dataset.data['Jobdata'][i]) for i in self.test_indices]}
 
-        isri_dataset_train.data['Files'] = [self.isri_dataset.data['Files'][i] for i in self.train_indices]
-        isri_dataset_train.data['GAChromosome'] = [self.isri_dataset.data['GAChromosome'][i] for i in self.train_indices]
-        isri_dataset_train.data['GAFitness'] = [self.isri_dataset.data['GAFitness'][i] for i in self.train_indices]
-        isri_dataset_test.data['Files'] = [self.isri_dataset.data['Files'][i] for i in self.test_indices]
-        isri_dataset_test.data['GAChromosome'] = [self.isri_dataset.data['GAChromosome'][i] for i in self.test_indices]
-        isri_dataset_test.data['GAFitness'] = [self.isri_dataset.data['GAFitness'][i] for i in self.test_indices]
+            isri_dataset_train.data['Files'] = [self.isri_dataset.data['Files'][i] for i in self.train_indices]
+            isri_dataset_train.data['GAChromosome'] = [self.isri_dataset.data['GAChromosome'][i] for i in self.train_indices]
+            isri_dataset_train.data['GAFitness'] = [self.isri_dataset.data['GAFitness'][i] for i in self.train_indices]
+            isri_dataset_test.data['Files'] = [self.isri_dataset.data['Files'][i] for i in self.test_indices]
+            isri_dataset_test.data['GAChromosome'] = [self.isri_dataset.data['GAChromosome'][i] for i in self.test_indices]
+            isri_dataset_test.data['GAFitness'] = [self.isri_dataset.data['GAFitness'][i] for i in self.test_indices]
 
-        if self.save:
-            self._save_with_index('train_dataset_mixed', isri_dataset_train)
-            self._save_with_index('test_dataset_mixed', isri_dataset_test)
+            if self.save:
+                self._save_with_index('train_dataset_mixed', isri_dataset_train)
+                self._save_with_index('test_dataset_mixed', isri_dataset_test)
 
         return isri_dataset_train, isri_dataset_test

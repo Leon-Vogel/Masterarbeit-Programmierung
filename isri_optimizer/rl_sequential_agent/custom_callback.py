@@ -99,3 +99,27 @@ class CustomCallback(BaseCallback):
         This event is triggered before exiting the `learn()` method.
         """
         pass
+
+class TestCallback:
+    def __init__(self):
+        self.workload_hist = deque(maxlen=100)
+        self.deadline_hist = deque(maxlen=100)
+        self.deadline_r_hist = deque(maxlen=100)
+        self.diffsum_r_hist = deque(maxlen=100)
+        self.results = []
+
+    def on_step(self, env, done, infos):
+        if done:
+            self.deadline_hist.append(env.deadline_gap)
+            self.workload_hist.append(env.workload_gap)
+            self.deadline_r_hist.append(env.deadline_r)
+            self.diffsum_r_hist.append(env.diffsum_r)
+
+            self.results.append({
+                'deadline_gap': np.mean(self.deadline_hist),
+                'workload_gap': np.mean(self.workload_hist),
+                'deadline_reward': np.mean(self.deadline_r_hist),
+                'diffsum_reward': np.mean(self.diffsum_r_hist)
+            })
+
+        return True

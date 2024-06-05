@@ -6,7 +6,7 @@ from sb3_contrib.ppo_mask import MaskablePPO
 import pickle
 from data_preprocessing import IsriDataset
 from stable_baselines3.common.callbacks import CheckpointCallback
-from isri_optimizer.rl_sequential_agent.custom_callback import CustomCallback
+from isri_optimizer.rl_sequential_agent.custom_callback import CustomCallback, TestCallback
 from stable_baselines3.dqn import DQN
 from sklearn.cluster import KMeans
 import torch as th
@@ -14,6 +14,9 @@ from itertools import product
 from typing import Callable
 from data_split import train_test, TrainTest
 import numpy as np
+import pandas as pd
+from stable_baselines3.common.utils import obs_as_tensor
+from sb3_contrib.common.maskable.utils import get_action_masks
 
 
 SAVE_FREQUENCY = 100_000
@@ -21,35 +24,19 @@ TOTAL_TRAINING_STEPS = 1500_000
 MODEL_SAVE_DIR = f"./isri_optimizer/rl_sequential_agent/savefiles_Train1/"
 JOBDATA_DIR = './isri_optimizer/instances/'
 SAVEFILE = f"./isri_optimizer/rl_sequential_agent/savefiles_Train1/_best_chromosome"
-N_TRAINING_INSTANCES = 500
+N_INSTANCES = 500
 GA_SOLUTIONS_PATH = "./isri_optimizer/rl_sequential_agent/IsriDataset.pkl" 
 N_TRIES = 1
 
-data = TrainTest(min_length=20, max_length=100, path=GA_SOLUTIONS_PATH, N_TRAINING_INSTANCES=N_TRAINING_INSTANCES ,all_data=True, save=True)
-isri_dataset, isri_dataset_test = data.get_data() #data.get_mixed_data() für Instanzen mit gemischter größe
-#data = train_test(min_length=20, max_length=100, path=GA_SOLUTIONS_PATH, N_TRAINING_INSTANCES=N_TRAINING_INSTANCES ,all_data=True, save=True)
-# isri_dataset, test_dataset = data.get_mixed_data() #für unterschiedlich große Instanzen
-#isri_dataset, isri_dataset_test = data.get_data() #für gleichgroße Instanzen
-# Loading instances and creating config
-#isri_dataset = pickle.load(open(GA_SOLUTIONS_PATH, 'rb'))
-#isri_dataset.data['Jobdata'] = isri_dataset.data['Jobdata'][:N_TRAINING_INSTANCES]
-#isri_dataset.data['Files'] = isri_dataset.data['Files'][:N_TRAINING_INSTANCES]
-#isri_dataset.data['GAChromosome'] = isri_dataset.data['GAChromosome'][:N_TRAINING_INSTANCES]
-#sri_dataset.data['GAFitness'] = isri_dataset.data['GAFitness'][:N_TRAINING_INSTANCES]
-
-
 def linear_schedule(initial_value: float) -> Callable[[float], float]:
-
     def func(progress_remaining: float) -> float:
-        if progress_remaining > 0.4:
-            return progress_remaining * initial_value
-        else:
-            return 0.4*initial_value
-
-
+        return max(0.4, progress_remaining) * initial_value
     return func
 
-# sourcery skip: dict-assign-update-to-union
+data = TrainTest(min_length=20, max_length=100, path=GA_SOLUTIONS_PATH, N_INSTANCES=N_INSTANCES ,all_data=True, 
+                 save=True, load=True, load_index=1, save_path="isri_optimizer/rl_sequential_agent/datasets/")
+isri_dataset, isri_dataset_test = data.get_data() #data.get_mixed_data() für Instanzen mit gemischter größe
+
 env_config = {
     "jpl": 20,  # Example values, please adjust according to your needs
     "conv_speed": 208,
@@ -89,7 +76,7 @@ env_config_test = {
 
 env_config_variants = {
     "last_n": [3], #20
-    "reward_type": ["sparse_sum"], #sparse dense combined sparse_sum , "sparse_sum"
+    "reward_type": ["dense", "sparse", "sparse_sum"], #sparse dense combined sparse_sum , "sparse_sum"
     "n_classes": [8, 12, 15], # Muss mit Kmeans übereinstimmen
     "cluster_method": ["kmeans", "no_cluster", "neighbour"] #kmeans neighbour no_cluster
 }
@@ -101,10 +88,10 @@ envs = {}
 envs_test ={}
 for combination in combinations:
     name = "_".join(f"{value}" for key, value in combination.items())
-    new_dict = env_config.copy() 
-    new_dict_test = env_config_test.copy()   
-    new_dict.update(combination)
-    new_dict_test.update(combination)
+    new_dict = env_config.copy()
+    new_dict_test = env_config_test.copy()
+    new_dict |= combination
+    new_dict_test |= combination
     envs[name] = new_dict
     envs_test[name] = new_dict_test
 
@@ -127,9 +114,8 @@ ppo_config = {
                           net_arch=dict(pi=[256, 128, 64], vf=[256, 128, 64])) #512, 
 }
 
-training = False
-testing = True
 if __name__ == '__main__':
+    training = False
     if training:
         for name, config in envs.items():
             for try_idx in range(N_TRIES):
@@ -146,78 +132,49 @@ if __name__ == '__main__':
                     outfile.write(str(config))
                     outfile.write("\n")
                     outfile.write(str(ppo_config))
+    testing = False
     if testing:
+        num_envs = 1
+        results = []
+        device = 'cpu'
         for name, config in envs_test.items():
             if config["cluster_method"] == "no_cluster":
                 env = IsriEnv_no_cluster(config)
             else:
                 env = IsriEnv(config)
             model = MaskablePPO.load(f'{MODEL_SAVE_DIR}_{name}' + f'/{name}_best_model', env)
-            obs=env.reset()
-            num_envs = 1
-            episode_starts = np.ones((num_envs,), dtype=bool)
-            dones = False
-            valid_action_array = np.array([1, 0])
-            while not dones:
-                action = model.predict(obs, action_masks=valid_action_array, episode_start=episode_starts,
-                                       deterministic=True)
-                obs, rewards, dones, info = env.step(action)
-                episode_starts = dones
-            
+            test_callback = TestCallback()
 
-            
-                '''
-    # Evaluiere Agent, Ergebnisse Dokumentieren
-        model = MaskablePPO.load(Training['Model'][i] + '\\best_model', env)
-    
-    obs = env.reset()
-    num_envs = 1
-    episode_starts = np.ones((num_envs,), dtype=bool)
-    dones = False
-    valid_action_array = np.array([1, 0])
-    while not dones:
-        action = model.predict(obs, action_masks=valid_action_array, episode_start=episode_starts,
-                               deterministic=True)
-        obs, rewards, dones, info = env.step(action)
-        episode_starts = dones
+            for test_run in range(100):
 
-    # Eval von 5 Plänen die nicht teil vom Training sind & Eval Rand actions
-    open(Training['Logs'][i] + '\\' + Training['Logname'][i] + '_Testing.txt', "w")
-    for j in range(sim_count):
-        done = False
-        reward_sum = 0
-        steps = 0
-        info = {}
-        obs = env.reset(eval_mode=True, eval_step=j)
-        episode_starts = np.ones((num_envs,), dtype=bool)
-        while not done:
-            steps += 1
-            action = model.predict(obs, action_masks=valid_action_array, episode_start=episode_starts,
-                                   deterministic=True)
-            obs, rewards, done, info = env.step(action)
-            episode_starts = done
-            reward_sum += rewards
-        with open(Training['Logs'][i] + '\\' + Training['Logname'][i] + '_Testing.txt', "a") as datei:
-            # Die Werte in die Datei schreiben, einen pro Zeile
-            datei.write('Steps = ' + str(steps) + "\n")
-            datei.write('Return = ' + str(reward_sum) + "\n")
-            datei.write('Info = ' + str(info) + "\n")
-    # Eval von Random Actions
-    open(Training['Logs'][i] + '\\' + Training['Logname'][i] + '_Random.txt', "w")
-    for j in range(5):
-        done = False
-        reward_sum = 0
-        steps = 0
-        info = {}
-        obs = env.reset(eval_mode=True, eval_step=j)
-        while not done:
-            steps += 1
-            action = random.randint(0, 4)
-            obs, rewards, done, info = env.step(action)
-            reward_sum += rewards
-        with open(Training['Logs'][i] + '\\' + Training['Logname'][i] + '_Random.txt', "a") as datei:
-            # Die Werte in die Datei schreiben, einen pro Zeile
-            datei.write('Steps = ' + str(steps) + "\n")
-            datei.write('Return = ' + str(reward_sum) + "\n")
-            datei.write('Info = ' + str(info) + "\n")
-'''
+                done = False
+                reward_sum = 0
+                steps = 0
+                obs, info = env.reset()
+                episode_starts = np.ones((num_envs,), dtype=bool)
+
+                while not done:
+                    steps += 1
+                    if len(obs.shape) == 1:
+                        obs = np.expand_dims(obs, axis=0)
+                    valid_action_array = env.action_masks()
+
+                    action, _ = model.predict(obs, action_masks=valid_action_array, episode_start=episode_starts, deterministic=True)
+                    obs, rewards, done, truncated, info = env.step(int(action))
+                    episode_starts = done
+                    reward_sum += rewards
+
+                    test_callback.on_step(env, done, info)
+
+                results.append({
+                    'env': name,
+                    'test_run': test_run,
+                    'total_steps': steps,
+                    'total_reward': reward_sum,
+                    'mean_deadline_gap': np.mean(test_callback.deadline_hist),
+                    'mean_workload_gap': np.mean(test_callback.workload_hist),
+                    'mean_deadline_reward': np.mean(test_callback.deadline_r_hist),
+                    'mean_diffsum_reward': np.mean(test_callback.diffsum_r_hist)
+                })
+        results_df = pd.DataFrame(results)
+        results_df.to_csv(f'{MODEL_SAVE_DIR}/testing_results.csv', index=False)

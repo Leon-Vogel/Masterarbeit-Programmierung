@@ -27,17 +27,12 @@ Experimente = {'sparse': {'_8': ['isri_optimizer/rl_sequential_agent/savefiles_T
                '_12': ['isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_12_kmeans/3_sparse_sum_12_kmeans_1/events.out.tfevents.1717339184.DESKTOP-6FHK9F7.12692.3', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_12_neighbour/3_sparse_sum_12_neighbour_1/events.out.tfevents.1717347924.DESKTOP-6FHK9F7.12692.5', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_12_no_cluster/3_sparse_sum_12_no_cluster_1/events.out.tfevents.1717345597.DESKTOP-6FHK9F7.12692.4'], 
                '_15': ['isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_15_kmeans/3_sparse_sum_15_kmeans_1/events.out.tfevents.1717350765.DESKTOP-6FHK9F7.12692.6', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_15_neighbour/3_sparse_sum_15_neighbour_1/events.out.tfevents.1717359505.DESKTOP-6FHK9F7.12692.8', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_15_no_cluster/3_sparse_sum_15_no_cluster_1/events.out.tfevents.1717357214.DESKTOP-6FHK9F7.12692.7']}}
 
-data_sparse_8 = read_tensorflow_events(Experimente, 'sparse', '_8')
-
-normale_plots = False
-explained_variance = True
-subplots = False
-
 for reward, values in Experimente.items():
     print(reward)
     for klassen, path in values.items():
         print(klassen)
         data = read_tensorflow_events(Experimente, reward, klassen)
+        normale_plots = False
         if normale_plots:
                 ergebnisse_plot(data['x_rew'], data['y_rew'], labels=names, title=f'kummulierter Reward bei {num_dict[klassen]} Aktionen', file_name=f'Return{klassen}',
                         moving_average=True, ma_interval=fenster, line_styles=linestyle,
@@ -56,6 +51,7 @@ for reward, values in Experimente.items():
                         colors=colors, y_low=None, y_high=None,
                         x_label="Trainings-Iterationen", y_label="Relative Abweichung zur Baseline",
                         leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
+        explained_variance = True
         if explained_variance:
             ergebnisse_plot(data['x_expl_var'], data['y_expl_var'], labels=names, title=f'Relativer Fehler der Value Funktion bei {num_dict[klassen]} Aktionen', file_name=f'Explained_Variance{klassen}',
                         moving_average=True, ma_interval=fenster, line_styles=linestyle,
@@ -63,7 +59,7 @@ for reward, values in Experimente.items():
                         x_label="Trainings-Iterationen", y_label="Explained Variance",
                         leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/', y_top=1)
               
-
+        subplots = False
         if subplots:
                 titles = [
                     'kummulierter Reward',
@@ -78,26 +74,3 @@ for reward, values in Experimente.items():
                                 )
 
 
-
-'''
-ergebnisse_plot(x_rew, y_rew, labels=names, title='Return', file_name='Return',
-                moving_average=True, ma_interval=fenster, leg_pos='lower right', line_styles=linestyle,
-                colors=colors, y_low=None, y_high=None,
-                x_label="Trainingsschritt", y_label="$\overline{R}$, gemittelter Return")
-
-ergebnisse_plot(x_plan, y_plan, labels=names, title='Planerfüllung', file_name='Plan',
-                moving_average=True, ma_interval=fenster, leg_pos='lower right',
-                colors=colors, y_low=None, y_high=None, line_styles=linestyle,
-                x_label="Trainingsschritt", y_label="$\omega$, Anteil richtig produzierter Produkte")
-
-ergebnisse_plot(x1_0, y1_0, labels=names, title='Durchlaufzeiten', file_name='Durchlaufzeiten',
-                moving_average=True, ma_interval=fenster, line_styles=linestyle,
-                colors=colors, y_low=None, y_high=None,
-                x_label="Trainingsschritt", y_label="Durchlaufzeit: Durchschnitt über alle Produkttypen [s]")
-
-ergebnisse_plot(x_ausl, y_ausl, labels=names, title='Varianz der Auslastung', file_name='Auslastung',
-                moving_average=True, ma_interval=fenster, y_scale='log',
-                colors=colors, y_low=None, y_high=None, line_styles=linestyle,
-                x_label="Trainingsschritt",
-                y_label="$\sigma_{3}+\sigma_{4}$, Varianz der Auslastung in Abschnitt 3 und 4 ")
-'''
