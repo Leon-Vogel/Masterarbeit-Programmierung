@@ -163,8 +163,8 @@ def find_event_files(base_dir):
 
 def find_event_files_dict(base_dir):
     event_files = {
-        'sparse': {'_8': [], '_12': [], '_15': []},
         'dense': {'_8': [], '_12': [], '_15': []},
+        'sparse': {'_8': [], '_12': [], '_15': []},
         'sparse_sum': {'_8': [], '_12': [], '_15': []}
     }
 
