@@ -97,6 +97,40 @@ def plot_hist(all_labels, bins, xlabel, ylabel, title, file_path, file_name, fil
     plt.savefig(f"{file_path}{file_name}_{file_suffix}.svg", format='svg', dpi=dpi)
     plt.close()
 
+def create_histogram_data_table(data, experiment_type, output_path):
+    df = pd.DataFrame(data, columns=['Shift'])
+    df['Shift'] = df['Shift'] + 1
+    freq_table = df['Shift'].value_counts().reset_index()
+    freq_table.columns = ['Shift', 'Frequency']
+    freq_table = freq_table.sort_values(by='Shift').reset_index(drop=True)
+    if len(freq_table) % 2 != 0:
+        freq_table = freq_table._append({'Shift': '', 'Frequency': 0}, ignore_index=True)
+    mid_index = len(freq_table) // 2
+    first_half = freq_table.iloc[:mid_index]
+    second_half = freq_table.iloc[mid_index:]
+    transposed_first_half = first_half.set_index('Shift').T
+    transposed_second_half = second_half.set_index('Shift').T
+    transposed_second_half.columns = transposed_second_half.columns[:-1].tolist() + [18]
+    table = (
+        "\\begin{table}[ht]\n\\centering\n\\begin{tabular}{l"
+    )
+    table += "c" * len(transposed_first_half.columns) + "}\n"
+    table += "\\hline\n"
+    table += "\\textbf{Position der Dringlichkeit} & " + " & ".join(map(str, transposed_first_half.columns)) + " \\\\\n"
+    table += "\\hline\n"
+    for index, row in transposed_first_half.iterrows():
+        table += "\\textbf{Häufigkeit der Auswahl} & " + " & ".join(map(str, row.values)) + " \\\\\n"
+    table += "\\hline\n"
+    table += "\\hline\n"
+    table += "\\textbf{Position der Dringlichkeit} & " + " & ".join(map(str, transposed_second_half.columns)) + " \\\\\n"
+    table += "\\hline\n"
+    for index, row in transposed_second_half.iterrows():
+        table += "\\textbf{Häufigkeit der Auswahl} & " + " & ".join(map(str, row.values)) + " \\\\\n"
+    table += "\\hline\n"
+    table += f"\\end{{tabular}}\\vspace{{0.4cm}}\n\\caption{{Verteilung der Dringlichkeit der ausgewählten Aufträge nach Liefertermin für {experiment_type}}}\n\\end{{table}}\n"
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(table)
+
 plot_cluster_metrics = False
 if plot_cluster_metrics:
     GA_SOLUTIONS_PATH = "./isri_optimizer/rl_sequential_agent/IsriDataset.pkl"
@@ -157,6 +191,7 @@ if plot_GA_solution:
         shift_record = pd.concat([shift_record, df], ignore_index=True)
     data = shift_record.values.tolist()
     data = np.array(data).flatten()
+    create_histogram_data_table(data, 'den genetischen Algorithmus', 'isri_optimizer/rl_sequential_agent/plots/data/histogram_data.tex')
     plot_hist(data, np.amax(data)+1, 'n dringendster Auftrag', 'Häufigkeit', 'Auswahl der n dringendsten Aufträge bei dem Genetischen Algorithmus', 
                           'isri_optimizer/rl_sequential_agent/plots/data/', 'GA', 'dringlichkeit')
 

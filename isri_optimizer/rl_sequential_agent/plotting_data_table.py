@@ -33,7 +33,7 @@ def create_latex_table(df, experiment_type):
                 table += f"\\hspace{{1em}}{Cluster[i]} & {row['total_reward']:.3f} & {row['mean_deadline_gap']:.3f} & {row['mean_workload_gap']:.3f} & {row['mean_deadline_reward']:.3f} & {row['mean_diffsum_reward']:.3f} \\\\\n"
         table += "\\hline\n"
 
-    table += "\\end{tabular}\n\\caption{Durchschnitt der Kennzahlen aus dem Test für " + Rewards[experiment_type] + "}\n\\end{table}\n"
+    table += "\\end{tabular}\\vspace{{0.4cm}}\n\\caption{Durchschnitt der Kennzahlen aus dem Test für " + Rewards[experiment_type] + "}\n\\end{table}\n"
     return table
 
 def create_latex_table_from_events(experiments, Rewards, Cluster):
@@ -75,7 +75,7 @@ def create_latex_table_from_events(experiments, Rewards, Cluster):
             table += "\\hline\n"
 
         table += (
-            "\\end{tabular}\n\\caption{Durchschnitt der Kennzahlen aus den letzten 50 Trainingsiterationen für " 
+            "\\end{tabular}\\vspace{{0.4cm}}\n\\caption{Durchschnitt der Kennzahlen aus den letzten 50 Trainingsiterationen für " 
             + Rewards[experiment_type] 
             + "}\n\\end{table}\n"
         )
