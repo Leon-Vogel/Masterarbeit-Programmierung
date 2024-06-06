@@ -45,7 +45,7 @@ def cluster_size_metrics(df_cluster, k_range, cluster):
     return distortions, inertias, silhouette, davies_bouldin
 
 
-def plot_elbow_method(k_range, values, xlabel, ylabel, title, file_path, file_name, file_suffix, font_size=7, dpi=500, fig_size=None):
+def plot_elbow_method(k_range, values, xlabel, ylabel, title, file_path, file_name, file_suffix, font_size=8, dpi=500, fig_size=None):
     if fig_size is None:
         fig_size = [4, 3]
     plt.rcParams.update({
@@ -66,9 +66,10 @@ def plot_elbow_method(k_range, values, xlabel, ylabel, title, file_path, file_na
     plt.subplots_adjust(left=0.15, bottom=0.15)
     plt.savefig(f"{file_path}{file_name}_{file_suffix}.png", format='png', dpi=dpi)
     plt.savefig(f"{file_path}{file_name}_{file_suffix}.svg", format='svg', dpi=dpi)
+    plt.savefig(f"{file_path}{file_name}_{file_suffix}.pdf", format='pdf', dpi=dpi)
     plt.close()
 
-def plot_hist(all_labels, bins, xlabel, ylabel, title, file_path, file_name, file_suffix, font_size=7, dpi=500, fig_size=None, grid=True):
+def plot_hist(all_labels, bins, xlabel, ylabel, title, file_path, file_name, file_suffix, font_size=8, dpi=500, fig_size=None, grid=True):
     all_labels = [x + 1 for x in all_labels]
     if fig_size is None:
         fig_size = [4, 3]
@@ -95,6 +96,7 @@ def plot_hist(all_labels, bins, xlabel, ylabel, title, file_path, file_name, fil
         ax.set_axisbelow(True) 
     plt.savefig(f"{file_path}{file_name}_{file_suffix}.png", format='png', dpi=dpi)
     plt.savefig(f"{file_path}{file_name}_{file_suffix}.svg", format='svg', dpi=dpi)
+    plt.savefig(f"{file_path}{file_name}_{file_suffix}.pdf", format='pdf', dpi=dpi)
     plt.close()
 
 def create_histogram_data_table(data, experiment_type, output_path):

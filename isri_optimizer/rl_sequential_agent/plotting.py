@@ -34,42 +34,36 @@ for reward, values in Experimente.items():
         data = read_tensorflow_events(Experimente, reward, klassen)
         normale_plots = True
         if normale_plots:
-                ergebnisse_plot(data['x_rew'], data['y_rew'], labels=names, title=f'kummulierter Reward bei {num_dict[klassen]} Aktionen', file_name=f'Return{klassen}',
-                        moving_average=True, ma_interval=fenster, line_styles=linestyle,
-                        colors=colors, y_low=None, y_high=None,
-                        x_label="Trainings-Iterationen", y_label="Return",
-                        leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
+                ergebnisse_plot(data['x_rew'], data['y_rew'], labels=names, title=f'kummulierter Reward bei {num_dict[klassen]} Aktionen', 
+                                file_name=f'Return{klassen}',moving_average=True, ma_interval=fenster, line_styles=linestyle,
+                                colors=colors, y_low=None, y_high=None,x_label="Trainings-Iterationen", y_label="Return",
+                                leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
 
-                ergebnisse_plot(data['x_diff'], data['y_diff'], labels=names, title=f'Vergleich der Auslastung bei {num_dict[klassen]} Aktionen', file_name=f'Diffsum{klassen}',
-                        moving_average=True, ma_interval=fenster, line_styles=linestyle,
-                        colors=colors, y_low=None, y_high=None,
-                        x_label="Trainings-Iterationen", y_label="Relative Abweichung zur Baseline",
-                        leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
+                ergebnisse_plot(data['x_diff'], data['y_diff'], labels=names, title=f'Vergleich der Auslastung bei {num_dict[klassen]} Aktionen', 
+                                file_name=f'Diffsum{klassen}',moving_average=True, ma_interval=fenster, line_styles=linestyle,
+                                colors=colors, y_low=None, y_high=None, x_label="Trainings-Iterationen", y_label="Relative Abweichung zur Baseline",
+                                leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
 
-                ergebnisse_plot(data['x_tard'], data['y_tard'], labels=names, title=f'Vergleich der Termintreue bei {num_dict[klassen]} Aktionen', file_name=f'Tardiness{klassen}',
-                        moving_average=True, ma_interval=fenster, line_styles=linestyle,
-                        colors=colors, y_low=None, y_high=None,
-                        x_label="Trainings-Iterationen", y_label="Relative Abweichung zur Baseline",
-                        leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
+                ergebnisse_plot(data['x_tard'], data['y_tard'], labels=names, title=f'Vergleich der Termintreue bei {num_dict[klassen]} Aktionen', 
+                                file_name=f'Tardiness{klassen}',moving_average=True, ma_interval=fenster, line_styles=linestyle,
+                                colors=colors, y_low=None, y_high=None,x_label="Trainings-Iterationen", y_label="Relative Abweichung zur Baseline",
+                                leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
                 
-                ergebnisse_plot(data['x_diff_rew'], data['y_diff_rew'], labels=names, title=f'kummulierter Reward für Auslastung bei {num_dict[klassen]} Aktionen', file_name=f'Diffsum{klassen}_rew',
-                        moving_average=True, ma_interval=fenster, line_styles=linestyle,
-                        colors=colors, y_low=None, y_high=None,
-                        x_label="Trainings-Iterationen", y_label="Reward für die Auslastung",
-                        leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
+                ergebnisse_plot(data['x_diff_rew'], data['y_diff_rew'], labels=names, title=f'kummulierter Reward für Auslastung bei {num_dict[klassen]} Aktionen', 
+                                file_name=f'Diffsum{klassen}_rew', moving_average=True, ma_interval=fenster, line_styles=linestyle,
+                                colors=colors, y_low=None, y_high=None, x_label="Trainings-Iterationen", y_label="Reward für die Auslastung",
+                                leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
 
-                ergebnisse_plot(data['x_tard_rew'], data['y_tard_rew'], labels=names, title=f'kummulierter Reward für Termintreue bei {num_dict[klassen]} Aktionen', file_name=f'Tardiness{klassen}_rew',
-                        moving_average=True, ma_interval=fenster, line_styles=linestyle,
-                        colors=colors, y_low=None, y_high=None,
-                        x_label="Trainings-Iterationen", y_label="Reward für die Termintreue",
-                        leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
+                ergebnisse_plot(data['x_tard_rew'], data['y_tard_rew'], labels=names, title=f'kummulierter Reward für Termintreue bei {num_dict[klassen]} Aktionen', 
+                                file_name=f'Tardiness{klassen}_rew', moving_average=True, ma_interval=fenster, line_styles=linestyle,
+                                colors=colors, y_low=None, y_high=None, x_label="Trainings-Iterationen", y_label="Reward für die Termintreue",
+                                leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
         explained_variance = False
         if explained_variance:
-            ergebnisse_plot(data['x_expl_var'], data['y_expl_var'], labels=names, title=f'Relativer Fehler der Value Funktion bei {num_dict[klassen]} Aktionen', file_name=f'Explained_Variance{klassen}',
-                        moving_average=True, ma_interval=fenster, line_styles=linestyle,
-                        colors=colors, y_low=None, y_high=None,
-                        x_label="Trainings-Iterationen", y_label="Explained Variance",
-                        leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/', y_top=1)
+            ergebnisse_plot(data['x_expl_var'], data['y_expl_var'], labels=names, title=f'Relativer Fehler der Value Funktion bei {num_dict[klassen]} Aktionen', 
+                            file_name=f'Explained_Variance{klassen}',moving_average=True, ma_interval=fenster, line_styles=linestyle,
+                                colors=colors, y_low=None, y_high=None,x_label="Trainings-Iterationen", y_label="Explained Variance",
+                                leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/', y_top=1)
               
         subplots = False
         if subplots:
@@ -80,7 +74,8 @@ for reward, values in Experimente.items():
                 ]
                 y_labels = ["Return", "Relative Abweichung zur Baseline", "Relative Abweichung zur Baseline"]
                 ergebnisse_subplot([data['x_rew'], data['x_diff'], data['x_tard']], [data['y_rew'], data['y_diff'], data['y_tard']], 
-                                    titles=titles, sup_title=f'Ergebnisse bei {num_dict[klassen]} Aktionen', x_label="Trainings-Iterationen", y_labels=y_labels, labels=names, moving_average=True, 
+                                    titles=titles, sup_title=f'Ergebnisse bei {num_dict[klassen]} Aktionen', x_label="Trainings-Iterationen", 
+                                    y_labels=y_labels, labels=names, moving_average=True, 
                                     ma_interval=fenster, line_styles=linestyle, colors=colors, y_low=None, y_high=None, leg_pos='lower right', 
                                     file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/', file_name=f'subplots_{klassen}'
                                 )

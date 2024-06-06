@@ -6,7 +6,7 @@ import pandas as pd
 
 def ergebnisse_plot(x_data_list, y_data_list, title="", x_label="", y_label="",
                     x_scale='linear', y_scale='linear',
-                    x_ticks=None, y_ticks=None, font_size=7, file_path="isri_optimizer/rl_sequential_agent/plots/",
+                    x_ticks=None, y_ticks=None, font_size=8, file_path="isri_optimizer/rl_sequential_agent/plots/",
                     file_name="plot.png", dpi=500, figsize=(4, 3),
                     line_styles=None, colors=None, labels=None,
                     moving_average=False, ma_interval=1, leg_pos='upper right',
@@ -76,12 +76,13 @@ def ergebnisse_plot(x_data_list, y_data_list, title="", x_label="", y_label="",
     # Speichern des Plots
     plt.savefig(file_path + file_name + '.png', format='png', dpi=dpi)
     plt.savefig(file_path + file_name + '.svg', format='svg', dpi=dpi)
+    plt.savefig(file_path + file_name + '.pdf', format='pdf', dpi=dpi)
     plt.close()
 
 
 def ergebnisse_subplot(x_data_list, y_data_list, titles, sup_title, x_label, y_labels, 
                        x_scale='linear', y_scale='linear', 
-                       x_ticks=None, y_ticks=None, font_size=7, file_path="isri_optimizer/rl_sequential_agent/plots/", 
+                       x_ticks=None, y_ticks=None, font_size=8, file_path="isri_optimizer/rl_sequential_agent/plots/", 
                        file_name="subplot.png", dpi=500, figsize=(4, 5), 
                        line_styles=None, colors=None, labels=None, 
                        moving_average=False, ma_interval=1, leg_pos='upper right', 
@@ -147,6 +148,7 @@ def ergebnisse_subplot(x_data_list, y_data_list, titles, sup_title, x_label, y_l
 
     plt.savefig(file_path + file_name + '.png', format='png', dpi=dpi)
     plt.savefig(file_path + file_name + '.svg', format='svg', dpi=dpi)
+    plt.savefig(file_path + file_name + '.pdf', format='pdf', dpi=dpi)
     plt.close()
 
 

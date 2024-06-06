@@ -1,0 +1,44 @@
+Einführung
+    Motivation
+        Humanzentrierte Produktionsplanung
+        Vorherige Studienarbeiten
+    Ziel der Arbeit/Forschungsfragen und Gliederung
+Stand der Technik
+    Technische Grundlagen
+        Reinforcement Learning
+        Proximal Policy Optimization mit Action Masking
+        Andere Verfahren
+            Genetischer Algorithmus
+            Clustering Verfahren
+    Permutation Flow Shop Scheduling/Flow und Job Shop Probleme
+        Optimierungsproblem
+        Reinforcement Learning
+            Q-Learning
+            Deep Learning
+            Proximal Policy Optimization
+        Hybride Lösungsansätze
+Anwendungsfall Isringhaus
+    Simulation
+    Optimierungsproblem
+    Lösung mit genetischem Algorithmus
+    Datengrundlage/Clustering
+Experimente
+    Reinforcement Learning Umgebung
+        Aktionsraum/Maske
+        Zustandsraum
+        Rewardfunktionen
+    Trainingsparameter
+Ergebnisse
+    Konstante Insatnzgrößen
+        Training 
+        Evaluation
+    Unterschiedliche Instanzgrößen
+        Training 
+        Evaluation
+Zusammenfassung
+    Vergleich der Varianten zusammenfassen
+    Forschungsfragen
+
+
+
+
