@@ -32,7 +32,7 @@ for reward, values in Experimente.items():
     for klassen, path in values.items():
         print(klassen)
         data = read_tensorflow_events(Experimente, reward, klassen)
-        normale_plots = False
+        normale_plots = True
         if normale_plots:
                 ergebnisse_plot(data['x_rew'], data['y_rew'], labels=names, title=f'kummulierter Reward bei {num_dict[klassen]} Aktionen', file_name=f'Return{klassen}',
                         moving_average=True, ma_interval=fenster, line_styles=linestyle,
@@ -51,7 +51,19 @@ for reward, values in Experimente.items():
                         colors=colors, y_low=None, y_high=None,
                         x_label="Trainings-Iterationen", y_label="Relative Abweichung zur Baseline",
                         leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
-        explained_variance = True
+                
+                ergebnisse_plot(data['x_diff_rew'], data['y_diff_rew'], labels=names, title=f'kummulierter Reward für Auslastung bei {num_dict[klassen]} Aktionen', file_name=f'Diffsum{klassen}_rew',
+                        moving_average=True, ma_interval=fenster, line_styles=linestyle,
+                        colors=colors, y_low=None, y_high=None,
+                        x_label="Trainings-Iterationen", y_label="Reward für die Auslastung",
+                        leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
+
+                ergebnisse_plot(data['x_tard_rew'], data['y_tard_rew'], labels=names, title=f'kummulierter Reward für Termintreue bei {num_dict[klassen]} Aktionen', file_name=f'Tardiness{klassen}_rew',
+                        moving_average=True, ma_interval=fenster, line_styles=linestyle,
+                        colors=colors, y_low=None, y_high=None,
+                        x_label="Trainings-Iterationen", y_label="Reward für die Termintreue",
+                        leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
+        explained_variance = False
         if explained_variance:
             ergebnisse_plot(data['x_expl_var'], data['y_expl_var'], labels=names, title=f'Relativer Fehler der Value Funktion bei {num_dict[klassen]} Aktionen', file_name=f'Explained_Variance{klassen}',
                         moving_average=True, ma_interval=fenster, line_styles=linestyle,

@@ -145,6 +145,7 @@ class TrainTest:
                     isri_dataset_train = pickle.load(f)
                 with open(f"{self.save_path}test_dataset_{self.load_index}.pkl", 'rb') as f:
                     isri_dataset_test = pickle.load(f)
+                print("Train und Test Daten geladen")
 
         else: 
             isri_dataset_train = IsriDataset(data_size=len(self.train_indices), seq_len=20)
@@ -163,6 +164,7 @@ class TrainTest:
             if self.save:
                 self._save_with_index('train_dataset', isri_dataset_train)
                 self._save_with_index('test_dataset', isri_dataset_test)
+                print("Train und Test Daten gespeichert")
 
         return isri_dataset_train, isri_dataset_test
 
@@ -176,6 +178,7 @@ class TrainTest:
                     isri_dataset_train = pickle.load(f)
                 with open(f"{self.save_path}test_dataset_mixed_{self.load_index}.pkl", 'rb') as f:
                     isri_dataset_test = pickle.load(f)
+                print("Train und Test Daten geladen")
         else:
             isri_dataset_train = IsriDataset(data_size=len(self.train_indices), seq_len=20)
             isri_dataset_test = IsriDataset(data_size=len(self.test_indices), seq_len=20)
@@ -193,5 +196,6 @@ class TrainTest:
             if self.save:
                 self._save_with_index('train_dataset_mixed', isri_dataset_train)
                 self._save_with_index('test_dataset_mixed', isri_dataset_test)
+                print("Train und Test Daten gespeichert")
 
         return isri_dataset_train, isri_dataset_test

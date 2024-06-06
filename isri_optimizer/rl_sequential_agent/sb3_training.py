@@ -21,9 +21,9 @@ from sb3_contrib.common.maskable.utils import get_action_masks
 
 SAVE_FREQUENCY = 100_000
 TOTAL_TRAINING_STEPS = 1500_000
-MODEL_SAVE_DIR = f"./isri_optimizer/rl_sequential_agent/savefiles_Train1/"
+MODEL_SAVE_DIR = f"./isri_optimizer/rl_sequential_agent/savefiles_test/" #Train1
 JOBDATA_DIR = './isri_optimizer/instances/'
-SAVEFILE = f"./isri_optimizer/rl_sequential_agent/savefiles_Train1/_best_chromosome"
+SAVEFILE = f"./isri_optimizer/rl_sequential_agent/savefiles_test/_best_chromosome" #Train1
 N_INSTANCES = 500
 GA_SOLUTIONS_PATH = "./isri_optimizer/rl_sequential_agent/IsriDataset.pkl" 
 N_TRIES = 1
@@ -80,9 +80,14 @@ env_config_variants = {
     "n_classes": [8, 12, 15], # Muss mit Kmeans übereinstimmen
     "cluster_method": ["kmeans", "no_cluster", "neighbour"] #kmeans neighbour no_cluster
 }
+env_config_variants_test = {
+    "last_n": [3], #20
+    "reward_type": ["sparse"], #sparse dense combined sparse_sum , "sparse_sum"
+    "n_classes": [8], # Muss mit Kmeans übereinstimmen
+    "cluster_method": ["kmeans"] #kmeans neighbour no_cluster
+}
 
-
-keys, values = zip(*env_config_variants.items())
+keys, values = zip(*env_config_variants_test.items())
 combinations = [dict(zip(keys, combination)) for combination in product(*values)]
 envs = {}
 envs_test ={}

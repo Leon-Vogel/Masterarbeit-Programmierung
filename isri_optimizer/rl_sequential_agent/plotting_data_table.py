@@ -19,7 +19,7 @@ def create_latex_table(df, experiment_type):
         "\\begin{table}[ht]\n\\centering\n\\begin{tabular}{lccccc}\n"
         + "\\hline\n"
     )
-    table += f"\\textbf{{Experiment}} & \\textbf{{Return}} & \\textbf{{D. Gap}} & \\textbf{{W. Gap}} & \\textbf{{D. Reward}} & \\textbf{{W. Reward}} \\\\\n"
+    table += f"\\textbf{{Experiment}} & \\textbf{{Return}} & \\textbf{{D. Gap}} & \\textbf{{W. Gap}} & \\textbf{{D. Return}} & \\textbf{{W. Return}} \\\\\n"
     table += "\\hline\n"
 
     for cluster_size in [8, 12, 15]:
@@ -44,27 +44,33 @@ def create_latex_table_from_events(experiments, Rewards, Cluster):
             "\\begin{table}[ht]\n\\centering\n\\begin{tabular}{lccccc}\n"
             + "\\hline\n"
         )
-        table += f"\\textbf{{Experiment}} & \\textbf{{Total Reward}} & \\textbf{{Deadline Gap}} & \\textbf{{Workload Gap}} \\\\\n"
+        table += f"\\textbf{{Experiment}} & \\textbf{{Return}} & \\textbf{{D. Gap}} & \\textbf{{W. Gap}} & \\textbf{{D. Return}} & \\textbf{{W. Return}} \\\\\n"
         table += "\\hline\n"
 
         for cluster_size, paths in values.items():
             Aktionen = f'{cluster_size.replace("_","")} Aktionen'
-            table += f"\\multicolumn{{4}}{{l}}{{\\textbf{{{Aktionen}}}}} \\\\\n"
+            table += f"\\multicolumn{{6}}{{l}}{{\\textbf{{{Aktionen}}}}} \\\\\n"
             data = read_tensorflow_events(experiments, experiment_type, cluster_size)
             for i, (cluster_method, path) in enumerate(zip(['kmeans', 'neighbour', 'no_cluster'], paths)):
 
                 total_rewards = data['y_rew'][i][-50:]
                 deadline_gaps = data['y_tard'][i][-50:]
                 workload_gaps = data['y_diff'][i][-50:]
+                deadline_rew = data['y_tard_rew'][i][-50:]
+                workload_rew = data['y_diff_rew'][i][-50:]
 
                 total_reward_mean = np.mean(total_rewards)
                 deadline_gap_mean = np.mean(deadline_gaps)
                 workload_gap_mean = np.mean(workload_gaps)
+                deadline_rew_mean = np.mean(deadline_rew)
+                workload_rew_mean = np.mean(workload_rew)
 
                 table += (
                     f"\\hspace{{1em}}{Cluster[i]} & {total_reward_mean:.3f} & "
                     f"{deadline_gap_mean:.3f} & "
-                    f"{workload_gap_mean:.3f} \\\\\n"
+                    f"{workload_gap_mean:.3f}& "
+                    f"{deadline_rew_mean:.3f} & "
+                    f"{workload_rew_mean:.3f} \\\\\n"
                 )
             table += "\\hline\n"
 

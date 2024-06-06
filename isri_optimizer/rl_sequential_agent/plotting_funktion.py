@@ -202,6 +202,10 @@ def read_tensorflow_events(event_files, keyword, suffix):
         'y_diff': [],
         'x_tard': [],
         'y_tard': [],
+        'x_diff_rew': [],
+        'y_diff_rew': [],
+        'x_tard_rew': [],
+        'y_tard_rew': [],
         'x_expl_var': [],
         'y_expl_var': []
     }
@@ -229,6 +233,14 @@ def read_tensorflow_events(event_files, keyword, suffix):
         if 'deadline_gap' in df.columns:
             data['x_tard'].append(list(df['deadline_gap'].index.values))
             data['y_tard'].append(df['deadline_gap'].to_list())
+            
+        if 'workload_gap' in df.columns:
+            data['x_diff_rew'].append(list(df['diffsum_reward'].index.values))
+            data['y_diff_rew'].append(df['diffsum_reward'].to_list())
+
+        if 'deadline_gap' in df.columns:
+            data['x_tard_rew'].append(list(df['deadline_reward'].index.values))
+            data['y_tard_rew'].append(df['deadline_reward'].to_list())
 
         if 'train/explained_variance' in df.columns:
             data['x_expl_var'].append(list(df['train/explained_variance'].index.values))

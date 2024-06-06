@@ -181,11 +181,15 @@ class IsriEnv(gym.Env):
             # balance_reward = np.abs(diffsum_difference - tardiness_difference) # Belohnen wenn Ziele im selben Maß erreicht werden
             self.workload_gap = diffsum_difference            
             self.deadline_gap = tardiness_difference
+            self.diffsum_r = self.workload_gap
+            self.deadline_r = self.deadline_gap
             #return (diffsum_difference + tardiness_difference - balance_reward) * 100
             reward = (diffsum_difference + tardiness_difference) * 1
             reward = float(reward)
             return reward
         else:
+            self.deadline_r =0
+            self.diffsum_r =0
             return 0
         
         
