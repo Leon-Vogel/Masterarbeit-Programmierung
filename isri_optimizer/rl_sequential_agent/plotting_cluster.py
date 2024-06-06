@@ -112,7 +112,9 @@ def create_histogram_data_table(data, experiment_type, output_path):
     transposed_second_half = second_half.set_index('Shift').T
     transposed_second_half.columns = transposed_second_half.columns[:-1].tolist() + [18]
     table = (
-        "\\begin{table}[ht]\n\\centering\n\\begin{tabular}{l"
+        f"\\begin{{table}}[ht]\n\\centering\n"
+        f"\\caption{{Verteilung der Dringlichkeit der ausgewählten Aufträge nach Liefertermin für {experiment_type}}}\n"
+        "\\begin{tabular}{l"
     )
     table += "c" * len(transposed_first_half.columns) + "}\n"
     table += "\\hline\n"
@@ -127,7 +129,7 @@ def create_histogram_data_table(data, experiment_type, output_path):
     for index, row in transposed_second_half.iterrows():
         table += "\\textbf{Häufigkeit der Auswahl} & " + " & ".join(map(str, row.values)) + " \\\\\n"
     table += "\\hline\n"
-    table += f"\\end{{tabular}}\\vspace{{0.4cm}}\n\\caption{{Verteilung der Dringlichkeit der ausgewählten Aufträge nach Liefertermin für {experiment_type}}}\n\\end{{table}}\n"
+    table += "\\end{tabular}\n\\end{table}\n"
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write(table)
 
