@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from plotting_funktion import read_tensorflow_events, find_event_files_dict
+import statistics
 
 MODEL_SAVE_DIR = "./isri_optimizer/rl_sequential_agent/savefiles_Train1/"
 
@@ -83,7 +84,56 @@ def create_latex_table_from_events(experiments, Rewards, Cluster):
     
     return tables
 
-test_table = True
+
+
+
+def create_latex_table_test_times(df):
+    reward_names = {
+        'dense': 'Häufig',
+        'sparse': 'Selten, relativ zum GA',
+        'sparse_sum': 'Selten'
+    }
+    latex_table = (
+        "\\begin{table}[ht]\n"
+        "\\caption{Durchschnittliche Laufzeit für die Clustering und Reward Varianten}\n"
+        "\\centering\n"
+        "\\label{tab:zeiten_testing}\n"
+        "\\begin{tabular}{lccc}\n"
+        "\\hline\n"
+        "\\textbf{} & \\textbf{Kmeans} & \\textbf{KNN} & \\textbf{Ohne Cluster} \\\\\n"
+        "\\hline\n"
+        "\multicolumn{4}{l}{\\textbf{Reward}} \\\\\n"
+    )
+    for experiment_type in ['dense', 'sparse', 'sparse_sum']:
+        filtered_df = df[df['env'].str.contains(experiment_type)]
+        Kmeans = []
+        KNN = []
+        No = []
+        for cluster_size in [8, 12, 15]:
+            for i, cluster_method in enumerate(['kmeans', 'neighbour', 'no_cluster']):
+                env_name = f"3_{experiment_type}_{cluster_size}_{cluster_method}"
+                subset = filtered_df[filtered_df['env'] == env_name]
+                if not subset.empty:
+                    if cluster_method == 'kmeans':
+                        Kmeans.append(subset['elapsed_time']._values[0])
+                    elif cluster_method == 'neighbour':
+                        KNN.append(subset['elapsed_time']._values[0])
+                    elif cluster_method == 'no_cluster':
+                        No.append(subset['elapsed_time']._values[0])
+        latex_table += f"\\hspace{{1em}}{reward_names[experiment_type]} & {statistics.mean(Kmeans):.3f} [s] & {statistics.mean(KNN):.3f} [s] & {statistics.mean(No):.3f} [s] \\\\\n"
+    latex_table += (
+        "\\hline\n"
+        "\\end{tabular}\n"
+        "\\end{table}\n"
+    )
+    with open('isri_optimizer/rl_sequential_agent/plots/average_testing_times.tex', 'w', encoding='utf-8') as f:
+        f.write(latex_table)
+
+
+
+
+
+test_table = False
 if test_table:
     latex_dense = create_latex_table(grouped_df, 'dense')
     latex_sparse = create_latex_table(grouped_df, 'sparse')
@@ -95,7 +145,7 @@ if test_table:
         f.write(latex_sparse)
         f.write("\n\n")
         f.write(latex_sparse_sum)
-train_table = True
+train_table = False
 if train_table:
     #base_directory = 'isri_optimizer/rl_sequential_agent/savefiles_Train1'
     event_file_paths = find_event_files_dict(MODEL_SAVE_DIR)
@@ -113,3 +163,12 @@ if train_table:
         for table in latex_tables.values():
             f.write(table)
             f.write("\n\n")
+
+
+
+times_table_train = True
+if times_table_train:
+    times_df = grouped_df[['env', 'elapsed_time']]
+    create_latex_table_test_times(grouped_df)
+    
+

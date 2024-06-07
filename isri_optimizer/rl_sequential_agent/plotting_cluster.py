@@ -196,8 +196,8 @@ if plot_GA_solution:
     data = shift_record.values.tolist()
     data = np.array(data).flatten()
     create_histogram_data_table(data, 'den genetischen Algorithmus', 'isri_optimizer/rl_sequential_agent/plots/data/histogram_data.tex')
-    plot_hist(data, np.amax(data)+1, 'n dringendster Auftrag', 'Häufigkeit', 'Auswahl der n dringendsten Aufträge bei dem Genetischen Algorithmus', 
-                          'isri_optimizer/rl_sequential_agent/plots/data/', 'GA', 'dringlichkeit')
+    plot_hist(data, np.amax(data)+1, 'n dringendster Auftrag', 'Häufigkeit', 'Auswahl der n dringendsten Aufträge bei dem genetischen Algorithmus', 
+                          'isri_optimizer/rl_sequential_agent/plots/data/', 'GA', 'Dringlichkeit')
 
 
 

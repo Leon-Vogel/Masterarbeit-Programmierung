@@ -17,6 +17,7 @@ import numpy as np
 import pandas as pd
 from stable_baselines3.common.utils import obs_as_tensor
 from sb3_contrib.common.maskable.utils import get_action_masks
+import time
 
 
 SAVE_FREQUENCY = 100_000
@@ -114,7 +115,7 @@ ppo_config = {
 }
 
 if __name__ == '__main__':
-    training = True
+    training = False
     if training:
         for name, config in envs.items():
             for try_idx in range(N_TRIES):
@@ -145,7 +146,7 @@ if __name__ == '__main__':
             test_callback = TestCallback()
 
             for test_run in range(100):
-
+                start_time = time.time()
                 done = False
                 reward_sum = 0
                 steps = 0
@@ -165,6 +166,8 @@ if __name__ == '__main__':
 
                     test_callback.on_step(env, done, info)
 
+                end_time = time.time()
+                elapsed_time = end_time - start_time
                 results.append({
                     'env': name,
                     'test_run': test_run,
@@ -173,7 +176,8 @@ if __name__ == '__main__':
                     'mean_deadline_gap': test_callback.deadline_hist[-1],
                     'mean_workload_gap': test_callback.workload_hist[-1],
                     'mean_deadline_reward': test_callback.deadline_r_hist[-1],
-                    'mean_diffsum_reward': test_callback.diffsum_r_hist[-1]
+                    'mean_diffsum_reward': test_callback.diffsum_r_hist[-1],
+                    'elapsed_time': elapsed_time
                 })
         results_df = pd.DataFrame(results)
         results_df.to_csv(f'{MODEL_SAVE_DIR}/testing_results.csv', index=False)

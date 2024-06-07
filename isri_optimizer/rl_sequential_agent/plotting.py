@@ -27,12 +27,26 @@ Experimente = {'sparse': {'_8': ['isri_optimizer/rl_sequential_agent/savefiles_T
                '_12': ['isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_12_kmeans/3_sparse_sum_12_kmeans_1/events.out.tfevents.1717339184.DESKTOP-6FHK9F7.12692.3', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_12_neighbour/3_sparse_sum_12_neighbour_1/events.out.tfevents.1717347924.DESKTOP-6FHK9F7.12692.5', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_12_no_cluster/3_sparse_sum_12_no_cluster_1/events.out.tfevents.1717345597.DESKTOP-6FHK9F7.12692.4'], 
                '_15': ['isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_15_kmeans/3_sparse_sum_15_kmeans_1/events.out.tfevents.1717350765.DESKTOP-6FHK9F7.12692.6', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_15_neighbour/3_sparse_sum_15_neighbour_1/events.out.tfevents.1717359505.DESKTOP-6FHK9F7.12692.8', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_15_no_cluster/3_sparse_sum_15_no_cluster_1/events.out.tfevents.1717357214.DESKTOP-6FHK9F7.12692.7']}}
 
+results_times = []
 for reward, values in Experimente.items():
     print(reward)
     for klassen, path in values.items():
         print(klassen)
         data = read_tensorflow_events(Experimente, reward, klassen)
-        normale_plots = True
+        zeit_erfassen = True
+        if zeit_erfassen:
+            name = 0
+            for i, total_time in enumerate(data['total_time']):
+                if name > 2:
+                     name = 0
+                results_times.append({
+                    'reward': reward,
+                    'klassen': klassen,
+                    'cluster_method': names[name],
+                    'total_time': total_time
+                })
+                name += 1
+        normale_plots = False
         if normale_plots:
                 ergebnisse_plot(data['x_rew'], data['y_rew'], labels=names, title=f'kummulierter Reward bei {num_dict[klassen]} Aktionen', 
                                 file_name=f'Return{klassen}',moving_average=True, ma_interval=fenster, line_styles=linestyle,
@@ -79,5 +93,30 @@ for reward, values in Experimente.items():
                                     ma_interval=fenster, line_styles=linestyle, colors=colors, y_low=None, y_high=None, leg_pos='lower right', 
                                     file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/', file_name=f'subplots_{klassen}'
                                 )
-
+if zeit_erfassen:
+    Reward_Namen=['Häufig', 'Selten, relativ zum GA', 'Selten']
+    df = pd.DataFrame(results_times)
+    mean_times = df.groupby(['reward', 'cluster_method'])['total_time'].mean().unstack()
+    mean_times = mean_times / 60.0 
+    mean_times = mean_times[['Kmeans', 'KNN', 'Ohne Cluster']]  
+    latex_table = (
+        "\\begin{table}[ht]\n"
+        "\\caption{Durchschnittliche Trainingsdauer (1,5 Millionen Schritte) für die Clustering und Reward Varianten}\n"
+        "\\centering\n"
+        "\\label{tab:zeiten_training}\n"
+        "\\begin{tabular}{lccc}\n"
+        "\\hline\n"
+        "\\textbf{} & \\textbf{Kmeans} & \\textbf{KNN} & \\textbf{Ohne Cluster} \\\\\n"
+        "\\hline\n"
+        "\\multicolumn{4}{l}{\\textbf{Reward}} \\\\\n"
+    )
+    for i, reward in enumerate(mean_times.index):
+        latex_table += f"\\hspace{{1em}}{Reward_Namen[i]} & {mean_times.at[reward, 'Kmeans']:.1f} [min] & {mean_times.at[reward, 'KNN']:.1f} [min] & {mean_times.at[reward, 'Ohne Cluster']:.1f} [min] \\\\\n"
+    latex_table += (
+        "\\hline\n"
+        "\\end{tabular}\n"
+        "\\end{table}\n"
+    )
+    with open('isri_optimizer/rl_sequential_agent/plots/average_training_times.tex', 'w', encoding='utf-8') as f:
+        f.write(latex_table)
 

@@ -209,12 +209,14 @@ def read_tensorflow_events(event_files, keyword, suffix):
         'x_tard_rew': [],
         'y_tard_rew': [],
         'x_expl_var': [],
-        'y_expl_var': []
+        'y_expl_var': [],
+        'total_time': []
     }
 
     files = event_files.get(keyword, {}).get(suffix, [])
     for file in files:
         d = {}
+        times = []
         for event in summary_iterator(file):
             for value in event.summary.value:
                 if value.HasField('simple_value'):
@@ -222,6 +224,7 @@ def read_tensorflow_events(event_files, keyword, suffix):
                         d[value.tag].append(value.simple_value)
                     else:
                         d[str(value.tag)] = [value.simple_value]
+            times.append(event.wall_time)
         df = pd.DataFrame.from_dict(d, orient='index').transpose()
 
         if 'rollout/ep_rew_mean' in df.columns:
@@ -247,6 +250,8 @@ def read_tensorflow_events(event_files, keyword, suffix):
         if 'train/explained_variance' in df.columns:
             data['x_expl_var'].append(list(df['train/explained_variance'].index.values))
             data['y_expl_var'].append(df['train/explained_variance'].to_list())
-
+        if times:
+            total_time = times[-1] - times[0]  # Gesamte Trainingszeit berechnen
+            data['total_time'].append(total_time)
     return data
 
