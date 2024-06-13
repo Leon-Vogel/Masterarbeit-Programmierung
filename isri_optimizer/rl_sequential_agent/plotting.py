@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 from tensorflow.python.summary.summary_iterator import summary_iterator
-from plotting_funktion import ergebnisse_plot, read_tensorflow_events, find_event_files_dict, ergebnisse_subplot
+from plotting_funktion import ergebnisse_plot, read_tensorflow_events, find_event_files_dict, ergebnisse_subplot, ergebnisse_subplot_2x2
 
 names = ['Kmeans', 'KNN', 'Ohne Cluster']
 num_dict = {
@@ -28,12 +28,16 @@ Experimente = {'sparse': {'_8': ['isri_optimizer/rl_sequential_agent/savefiles_T
                '_15': ['isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_15_kmeans/3_sparse_sum_15_kmeans_1/events.out.tfevents.1717350765.DESKTOP-6FHK9F7.12692.6', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_15_neighbour/3_sparse_sum_15_neighbour_1/events.out.tfevents.1717359505.DESKTOP-6FHK9F7.12692.8', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_15_no_cluster/3_sparse_sum_15_no_cluster_1/events.out.tfevents.1717357214.DESKTOP-6FHK9F7.12692.7']}}
 
 results_times = []
+normale_plots = False
+explained_variance = False
+subplots = False
+subplots_4 = True
 for reward, values in Experimente.items():
     print(reward)
     for klassen, path in values.items():
         print(klassen)
         data = read_tensorflow_events(Experimente, reward, klassen)
-        zeit_erfassen = True
+        zeit_erfassen = False
         if zeit_erfassen:
             name = 0
             for i, total_time in enumerate(data['total_time']):
@@ -46,7 +50,6 @@ for reward, values in Experimente.items():
                     'total_time': total_time
                 })
                 name += 1
-        normale_plots = False
         if normale_plots:
                 ergebnisse_plot(data['x_rew'], data['y_rew'], labels=names, title=f'kummulierter Reward bei {num_dict[klassen]} Aktionen', 
                                 file_name=f'Return{klassen}',moving_average=True, ma_interval=fenster, line_styles=linestyle,
@@ -62,7 +65,7 @@ for reward, values in Experimente.items():
                                 file_name=f'Tardiness{klassen}',moving_average=True, ma_interval=fenster, line_styles=linestyle,
                                 colors=colors, y_low=None, y_high=None,x_label="Trainings-Iterationen", y_label="Relative Abweichung zur Baseline",
                                 leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
-                
+
                 ergebnisse_plot(data['x_diff_rew'], data['y_diff_rew'], labels=names, title=f'kummulierter Reward für Auslastung bei {num_dict[klassen]} Aktionen', 
                                 file_name=f'Diffsum{klassen}_rew', moving_average=True, ma_interval=fenster, line_styles=linestyle,
                                 colors=colors, y_low=None, y_high=None, x_label="Trainings-Iterationen", y_label="Reward für die Auslastung",
@@ -72,17 +75,15 @@ for reward, values in Experimente.items():
                                 file_name=f'Tardiness{klassen}_rew', moving_average=True, ma_interval=fenster, line_styles=linestyle,
                                 colors=colors, y_low=None, y_high=None, x_label="Trainings-Iterationen", y_label="Reward für die Termintreue",
                                 leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/')
-        explained_variance = False
         if explained_variance:
             ergebnisse_plot(data['x_expl_var'], data['y_expl_var'], labels=names, title=f'Relativer Fehler der Value Funktion bei {num_dict[klassen]} Aktionen', 
                             file_name=f'Explained_Variance{klassen}',moving_average=True, ma_interval=fenster, line_styles=linestyle,
                                 colors=colors, y_low=None, y_high=None,x_label="Trainings-Iterationen", y_label="Explained Variance",
                                 leg_pos='lower right', file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/', y_top=1)
-              
-        subplots = False
+
         if subplots:
                 titles = [
-                    'kummulierter Reward',
+                    'Kummulierter Reward',
                     'Vergleich der Auslastung',
                     'Vergleich der Termintreue',
                 ]
@@ -91,8 +92,25 @@ for reward, values in Experimente.items():
                                     titles=titles, sup_title=f'Ergebnisse bei {num_dict[klassen]} Aktionen', x_label="Trainings-Iterationen", 
                                     y_labels=y_labels, labels=names, moving_average=True, 
                                     ma_interval=fenster, line_styles=linestyle, colors=colors, y_low=None, y_high=None, leg_pos='lower right', 
-                                    file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/', file_name=f'subplots_{klassen}'
+                                    file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/', file_name=f'subplots{klassen}'
                                 )
+        if subplots_4:
+                titles = [
+                    'kummulierter Reward',
+                    'Vergleich der Auslastung',
+                    'Vergleich der Termintreue',
+                    'Explained Variance'
+                ]
+                y_labels = ["Return", "Auslastung reltaiv zum GA", "Termintreue relativ zum GA", "Explained Variance"]
+                ergebnisse_subplot_2x2([data['x_rew'], data['x_diff'], data['x_tard'], data['x_expl_var']], [data['y_rew'], data['y_diff'], data['y_tard'], data['y_expl_var']], 
+                                    titles=titles, show_titles=False, show_sup_title=False, sup_title=f'Ergebnisse bei {num_dict[klassen]} Aktionen', x_label="Trainings-Iterationen", 
+                                    y_labels=y_labels, labels=names, moving_average=True, 
+                                    ma_interval=fenster, line_styles=linestyle, colors=colors, y_low=None, y_high=None, leg_pos='lower right', 
+                                    file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/{reward}', file_name=f'_subplots4_{klassen}'
+                                )
+
+
+
 if zeit_erfassen:
     Reward_Namen=['Häufig', 'Selten, relativ zum GA', 'Selten']
     df = pd.DataFrame(results_times)

@@ -99,6 +99,41 @@ def plot_hist(all_labels, bins, xlabel, ylabel, title, file_path, file_name, fil
     plt.savefig(f"{file_path}{file_name}_{file_suffix}.pdf", format='pdf', dpi=dpi)
     plt.close()
 
+def plot_relative_hist(all_labels, bins, xlabel, ylabel, title, file_path, file_name, file_suffix, font_size=8, dpi=500, fig_size=None, grid=True):
+    all_labels = [x + 1 for x in all_labels]
+    if fig_size is None:
+        fig_size = [4, 3]
+    plt.rcParams.update({
+        'font.size': font_size,
+        'legend.fontsize': font_size,
+        'xtick.labelsize': font_size,
+        'ytick.labelsize': font_size,
+        'font.family': 'Times New Roman',
+        'figure.dpi': dpi,
+        'figure.figsize': fig_size
+    })
+    plt.figure(figsize=fig_size)
+    
+    # Berechne die relativen Häufigkeiten
+    counts, bin_edges = np.histogram(all_labels, bins=np.arange(0.5, bins + 1.5, 1))
+    relative_freqs = counts / len(all_labels)
+    
+    plt.hist(all_labels, bins=np.arange(0.5, bins + 1.5, 1), weights=np.ones_like(all_labels) / len(all_labels), edgecolor='black')
+    
+    plt.xticks(np.arange(1, bins+1, 1))  
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    #plt.title(title, fontsize=font_size)
+    plt.subplots_adjust(left=0.15, bottom=0.15)
+    if grid:
+        ax = plt.gca()
+        ax.grid(True)
+        ax.set_axisbelow(True)
+    plt.savefig(f"{file_path}{file_name}_{file_suffix}.png", format='png', dpi=dpi)
+    plt.savefig(f"{file_path}{file_name}_{file_suffix}.svg", format='svg', dpi=dpi)
+    plt.savefig(f"{file_path}{file_name}_{file_suffix}.pdf", format='pdf', dpi=dpi)
+    plt.close()
+
 def create_histogram_data_table(data, experiment_type, output_path):
     df = pd.DataFrame(data, columns=['Shift'])
     df['Shift'] = df['Shift'] + 1
@@ -195,10 +230,11 @@ if plot_GA_solution:
         shift_record = pd.concat([shift_record, df], ignore_index=True)
     data = shift_record.values.tolist()
     data = np.array(data).flatten()
-    create_histogram_data_table(data, 'den genetischen Algorithmus', 'isri_optimizer/rl_sequential_agent/plots/data/histogram_data.tex')
-    plot_hist(data, np.amax(data)+1, 'n dringendster Auftrag', 'Häufigkeit', 'Auswahl der n dringendsten Aufträge bei dem genetischen Algorithmus', 
-                          'isri_optimizer/rl_sequential_agent/plots/data/', 'GA', 'Dringlichkeit')
-
+    #create_histogram_data_table(data, 'den genetischen Algorithmus', 'isri_optimizer/rl_sequential_agent/plots/data/histogram_data.tex')
+    #plot_hist(data, np.amax(data)+1, 'n dringendster Auftrag', 'Häufigkeit', 'Auswahl der n dringendsten Aufträge bei dem genetischen Algorithmus', 
+    #                      'isri_optimizer/rl_sequential_agent/plots/data/', 'GA', 'Dringlichkeit')
+    plot_relative_hist(data, np.amax(data)+1, 'Priorität nach Liefertermin', 'relative Häufigkeit', 'Auswahl der n dringendsten Aufträge bei dem genetischen Algorithmus', 
+                          'isri_optimizer/rl_sequential_agent/plots/data/', 'GA', 'Dringlichkeit_relativ')
 
 
 

@@ -143,7 +143,7 @@ if __name__ == '__main__':
                     )
                 jobdata = {key: value for key, value in jobdata.items() if key in sorted_jobdata[:N_JOBS]}
             GA_PARAMS['jobs'] = jobdata
-            res, best_chromosome, best_fitness = run_alg_parallel(run_alg, GA_PARAMS)
+            res, best_chromosome, best_fitness = run_alg_parallel(run_alg, GA_PARAMS) #GA für eine instanz, timen
             job_list = [job for job in jobdata.keys()] # Damit Reihenfolge klar ist
             # plot_barplots(best_chromosome, jobdata)
             assert np.all([job_id in jobdata.keys() for job_id in best_chromosome]), 'Chromosome passt nicht zum Problem?!'
