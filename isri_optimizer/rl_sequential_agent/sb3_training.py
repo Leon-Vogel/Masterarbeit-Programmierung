@@ -115,7 +115,7 @@ ppo_config = {
 }
 
 if __name__ == '__main__':
-    training = False
+    training = True
     if training:
         for name, config in envs.items():
             for try_idx in range(N_TRIES):

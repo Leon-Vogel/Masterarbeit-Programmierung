@@ -22,8 +22,9 @@ class cluster_kmeans():
                 self.kmeans = pickle.load(f)
         else:
             GA_SOLUTIONS_PATH = "isri_optimizer/rl_sequential_agent/IsriDataset.pkl"
+            Train_Data = "isri_optimizer/rl_sequential_agent/datasets/train_dataset_1.pkl"
 
-            isri_dataset = pickle.load(open(GA_SOLUTIONS_PATH, 'rb'))
+            isri_dataset = pickle.load(open(Train_Data, 'rb')) #GA_SOLUTIONS_PATH
 
             df = pd.DataFrame()
 
@@ -63,14 +64,15 @@ y = Cluster.label(daten)
 print(y)'''
 
 class cluster_neighbour():
-    def __init__(self, n_cluster, path="isri_optimizer/rl_sequential_agent/cluster_models/"):
+    def __init__(self, n_cluster, path="isri_optimizer/rl_sequential_agent/cluster_models_datasplit/"):
         if os.path.exists(path+"knn_model_n"+str(n_cluster)+".pkl"):
             with open(path+"knn_model_n"+str(n_cluster)+".pkl", "rb") as f:
                 self.knn_model = pickle.load(f)
         else:
             GA_SOLUTIONS_PATH = "isri_optimizer/rl_sequential_agent/IsriDataDict.pkl"
+            Train_Data = "isri_optimizer/rl_sequential_agent/datasets/train_dataset_1.pkl"
 
-            isri_dataset = pickle.load(open(GA_SOLUTIONS_PATH, 'rb'))
+            isri_dataset = pickle.load(open(Train_Data, 'rb')) #GA_SOLUTIONS_PATH
 
             df = pd.DataFrame()
 
@@ -86,7 +88,7 @@ class cluster_neighbour():
             y_means = agglo_model.fit_predict(df)
 
             #df.insert(0, "label", y_means, True)
-            self.knn_model = KNeighborsRegressor(n_neighbors=3)
+            self.knn_model = KNeighborsRegressor(n_neighbors=1)
             self.knn_model.fit(df, y_means)
             with open(path+"knn_model_n"+str(n_cluster)+".pkl", "wb") as f:
                 pickle.dump(self.knn_model, f)

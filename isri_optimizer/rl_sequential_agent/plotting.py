@@ -5,7 +5,7 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 from tensorflow.python.summary.summary_iterator import summary_iterator
 from plotting_funktion import ergebnisse_plot, read_tensorflow_events, find_event_files_dict, ergebnisse_subplot, ergebnisse_subplot_2x2
 
-names = ['Kmeans', 'KNN', 'Ohne Cluster']
+names = ['Kmeans', 'Agglomerativ', 'Ohne Cluster']
 num_dict = {
     '_8': 'acht',
     '_12': 'zwölf',
@@ -116,7 +116,7 @@ if zeit_erfassen:
     df = pd.DataFrame(results_times)
     mean_times = df.groupby(['reward', 'cluster_method'])['total_time'].mean().unstack()
     mean_times = mean_times / 60.0 
-    mean_times = mean_times[['Kmeans', 'KNN', 'Ohne Cluster']]  
+    mean_times = mean_times[['Kmeans', 'Agglomerativ', 'Ohne Cluster']]  
     latex_table = (
         "\\begin{table}[ht]\n"
         "\\caption{Durchschnittliche Trainingsdauer (1,5 Millionen Schritte) für die Clustering und Reward Varianten}\n"
@@ -129,7 +129,7 @@ if zeit_erfassen:
         "\\multicolumn{4}{l}{\\textbf{Reward}} \\\\\n"
     )
     for i, reward in enumerate(mean_times.index):
-        latex_table += f"\\hspace{{1em}}{Reward_Namen[i]} & {mean_times.at[reward, 'Kmeans']:.1f} [min] & {mean_times.at[reward, 'KNN']:.1f} [min] & {mean_times.at[reward, 'Ohne Cluster']:.1f} [min] \\\\\n"
+        latex_table += f"\\hspace{{1em}}{Reward_Namen[i]} & {mean_times.at[reward, 'Kmeans']:.1f} [min] & {mean_times.at[reward, 'Agglomerativ']:.1f} [min] & {mean_times.at[reward, 'Ohne Cluster']:.1f} [min] \\\\\n"
     latex_table += (
         "\\hline\n"
         "\\end{tabular}\n"
