@@ -11,6 +11,7 @@ import tqdm
 import matplotlib.pyplot as plt
 from torch.utils.data import Dataset
 from typing import Any
+import time
 
 RAW_DATA_PATH = "C:/Users/lukas/Documents/SUPPORT/Isringhausen/Daten/BatchExport"
 MJD_PATH = "C:/Users/lukas/Documents/SUPPORT/Isringhausen/mjd.csv"
@@ -133,9 +134,11 @@ if __name__ == '__main__':
     preprocessed_files = os.listdir(PREPROCESSED_FILES_PATH)
     
     data = IsriDataset(len(preprocessed_files), seq_len=GA_PARAMS['n_jobs'], solve=False)
+    results =[]
 
     for file in tqdm.tqdm(preprocessed_files, desc="Processing files"):
         try:
+            start_time = time.time()
             with open(PREPROCESSED_FILES_PATH + file, "rb") as infile:
                 jobdata = pickle.load(infile)
                 sorted_jobdata = list(
@@ -148,8 +151,15 @@ if __name__ == '__main__':
             # plot_barplots(best_chromosome, jobdata)
             assert np.all([job_id in jobdata.keys() for job_id in best_chromosome]), 'Chromosome passt nicht zum Problem?!'
             data.add_item(jobdata, file, best_chromosome, best_fitness)
+            end_time = time.time()
+            elapsed_time = end_time - start_time
+            results.append({
+                'elapsed_time_ga': elapsed_time
+            })
         except Exception as E:
             print(f"Error in file {file}: {E}")
+    results_df = pd.DataFrame(results)
+    results_df.to_csv(f'time_ga.csv', index=False)
     
     with open(f"IsriDataset_{N_JOBS}_jobs.pkl", "wb") as outfile:
         pickle.dump(data, outfile)
