@@ -133,7 +133,7 @@ def create_latex_table_test_times(df):
 
 
 
-test_table = False
+test_table = True
 if test_table:
     latex_dense = create_latex_table(grouped_df, 'dense')
     latex_sparse = create_latex_table(grouped_df, 'sparse')
@@ -145,7 +145,7 @@ if test_table:
         f.write(latex_sparse)
         f.write("\n\n")
         f.write(latex_sparse_sum)
-train_table = False
+train_table = True
 if train_table:
     #base_directory = 'isri_optimizer/rl_sequential_agent/savefiles_Train1'
     event_file_paths = find_event_files_dict(MODEL_SAVE_DIR)

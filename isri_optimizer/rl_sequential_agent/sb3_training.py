@@ -95,6 +95,8 @@ for combination in combinations:
     envs[name] = new_dict
     envs_test[name] = new_dict_test
 
+#del envs['3_dense_8_kmeans'] 
+#del envs['3_dense_8_no_cluster']
 
 ppo_config = {
     'policy': 'MlpPolicy',
@@ -125,7 +127,8 @@ if __name__ == '__main__':
                     env = IsriEnv(config)
                 ppo_config['env'] = env
                 callback = CustomCallback(path=f'{MODEL_SAVE_DIR}_{name}' + f'/{name}_best_model')
-                model = MaskablePPO(**ppo_config, learning_rate=linear_schedule(0.0005) ,tensorboard_log=f'{MODEL_SAVE_DIR}_{name}') #, ent_coef=linear_schedule(0.001)
+                model = MaskablePPO(**ppo_config, learning_rate=linear_schedule(0.0005), 
+                                    device='cpu' ,tensorboard_log=f'{MODEL_SAVE_DIR}_{name}') #, ent_coef=linear_schedule(0.001) #th.device('cuda:0' if th.cuda.is_available() else 'cpu')
                 model.learn(TOTAL_TRAINING_STEPS, tb_log_name=f'{name}', callback=callback)
                 model.save(f'{MODEL_SAVE_DIR}_{name}' + f'/{name}_{TOTAL_TRAINING_STEPS}_{try_idx}')
                 with open(f'{MODEL_SAVE_DIR}_{name}' + f'/{name}_config.txt', "w") as outfile:

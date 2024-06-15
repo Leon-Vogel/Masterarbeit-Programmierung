@@ -14,8 +14,6 @@ num_dict = {
 fenster = 31
 linestyle = ['solid', 'solid', 'solid']
 colors = ['tab:blue', 'tab:red', 'tab:green']
-#base_directory = 'isri_optimizer/rl_sequential_agent/savefiles_Train1'
-#event_file_paths = find_event_files_dict(base_directory) #erzeigt den dict Experimente
 
 Experimente = {'sparse': {'_8': ['isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_8_kmeans/3_sparse_8_kmeans_1/events.out.tfevents.1717196323.DESKTOP-6FHK9F7.8532.9', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_8_neighbour/3_sparse_8_neighbour_1/events.out.tfevents.1717202642.DESKTOP-6FHK9F7.8532.10', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_8_no_cluster/3_sparse_8_no_cluster_1/events.out.tfevents.1717205357.DESKTOP-6FHK9F7.8532.11'], 
             '_12': ['isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_12_kmeans/3_sparse_12_kmeans_1/events.out.tfevents.1717207499.DESKTOP-6FHK9F7.8532.12', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_12_neighbour/3_sparse_12_neighbour_1/events.out.tfevents.1717213907.DESKTOP-6FHK9F7.8532.13', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_12_no_cluster/3_sparse_12_no_cluster_1/events.out.tfevents.1717216667.DESKTOP-6FHK9F7.8532.14'], 
@@ -27,6 +25,8 @@ Experimente = {'sparse': {'_8': ['isri_optimizer/rl_sequential_agent/savefiles_T
                '_12': ['isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_12_kmeans/3_sparse_sum_12_kmeans_1/events.out.tfevents.1717339184.DESKTOP-6FHK9F7.12692.3', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_12_neighbour/3_sparse_sum_12_neighbour_1/events.out.tfevents.1717347924.DESKTOP-6FHK9F7.12692.5', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_12_no_cluster/3_sparse_sum_12_no_cluster_1/events.out.tfevents.1717345597.DESKTOP-6FHK9F7.12692.4'], 
                '_15': ['isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_15_kmeans/3_sparse_sum_15_kmeans_1/events.out.tfevents.1717350765.DESKTOP-6FHK9F7.12692.6', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_15_neighbour/3_sparse_sum_15_neighbour_1/events.out.tfevents.1717359505.DESKTOP-6FHK9F7.12692.8', 'isri_optimizer/rl_sequential_agent/savefiles_Train1/_3_sparse_sum_15_no_cluster/3_sparse_sum_15_no_cluster_1/events.out.tfevents.1717357214.DESKTOP-6FHK9F7.12692.7']}}
 
+base_directory = 'isri_optimizer/rl_sequential_agent/savefiles_Train1'
+Experimente = find_event_files_dict(base_directory) #erzeigt den dict Experimente
 results_times = []
 normale_plots = False
 explained_variance = False
@@ -37,7 +37,7 @@ for reward, values in Experimente.items():
     for klassen, path in values.items():
         print(klassen)
         data = read_tensorflow_events(Experimente, reward, klassen)
-        zeit_erfassen = False
+        zeit_erfassen = True
         if zeit_erfassen:
             name = 0
             for i, total_time in enumerate(data['total_time']):
