@@ -31,7 +31,7 @@ results_times = []
 normale_plots = False
 explained_variance = False
 subplots = False
-subplots_4 = True
+subplots_4 = False
 for reward, values in Experimente.items():
     print(reward)
     for klassen, path in values.items():
@@ -112,11 +112,12 @@ for reward, values in Experimente.items():
 
 
 if zeit_erfassen:
-    Reward_Namen=['Häufig', 'Selten, relativ zum GA', 'Selten']
+    Reward_Namen = ['Häufig', 'Selten, relativ zum GA', 'Selten']
     df = pd.DataFrame(results_times)
     mean_times = df.groupby(['reward', 'cluster_method'])['total_time'].mean().unstack()
-    mean_times = mean_times / 60.0 
-    mean_times = mean_times[['Kmeans', 'Agglomerativ', 'Ohne Cluster']]  
+    mean_times = mean_times / 60.0  
+    mean_times = mean_times[['Kmeans', 'Agglomerativ', 'Ohne Cluster']] 
+    overall_mean_times = mean_times.mean()
     latex_table = (
         "\\begin{table}[ht]\n"
         "\\caption{Durchschnittliche Trainingsdauer (1,5 Millionen Schritte) für die Clustering und Reward Varianten}\n"
@@ -124,12 +125,15 @@ if zeit_erfassen:
         "\\label{tab:zeiten_training}\n"
         "\\begin{tabular}{lccc}\n"
         "\\hline\n"
-        "\\textbf{} & \\textbf{Kmeans} & \\textbf{KNN} & \\textbf{Ohne Cluster} \\\\\n"
+        " & \\textbf{Kmeans} & \\textbf{Agglomerativ} & \\textbf{Ohne Cluster} \\\\\n"
         "\\hline\n"
-        "\\multicolumn{4}{l}{\\textbf{Reward}} \\\\\n"
     )
-    for i, reward in enumerate(mean_times.index):
-        latex_table += f"\\hspace{{1em}}{Reward_Namen[i]} & {mean_times.at[reward, 'Kmeans']:.1f} [min] & {mean_times.at[reward, 'Agglomerativ']:.1f} [min] & {mean_times.at[reward, 'Ohne Cluster']:.1f} [min] \\\\\n"
+    latex_table += (
+        f"Trainingsdauer & "
+        f"{overall_mean_times['Kmeans']:.1f} [min] & "
+        f"{overall_mean_times['Agglomerativ']:.1f} [min] & "
+        f"{overall_mean_times['Ohne Cluster']:.1f} [min] \\\\\n"
+    )
     latex_table += (
         "\\hline\n"
         "\\end{tabular}\n"

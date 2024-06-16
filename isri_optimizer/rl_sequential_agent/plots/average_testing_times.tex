@@ -1,15 +1,13 @@
 \begin{table}[ht]
-\caption{Durchschnittliche Laufzeit für die Clustering und Reward Varianten}
+\caption{Durchschnittliche Laufzeit für einen Produktionsplan im Test und Zeitersparnis relativ zum genetischen Algorithmus (GA)}
 \centering
 \label{tab:zeiten_testing}
-\begin{tabular}{lccc}
+\begin{tabular}{lcccc}
 \hline
-\textbf{} & \textbf{Kmeans} & \textbf{KNN} & \textbf{Ohne Cluster} \\
+\textbf{} & \textbf{Kmeans} & \textbf{Agglomerativ} & \textbf{Ohne Cluster}  & \textbf{GA} \\
 \hline
-\multicolumn{4}{l}{\textbf{Reward}} \\
-\hspace{1em}Häufig & 0.108 [s] & 0.040 [s] & 0.034 [s] \\
-\hspace{1em}Selten, relativ zum GA & 0.107 [s] & 0.039 [s] & 0.033 [s] \\
-\hspace{1em}Selten & 0.107 [s] & 0.039 [s] & 0.033 [s] \\
+Laufzeit & 0.107 [s] & 0.040 [s] & 0.033 [s] & 9.406 [s] \\
+Zeitersparnis & 98.9 \% & 99.6 \% & 99.6 \% &  \\
 \hline
 \end{tabular}
 \end{table}

@@ -95,7 +95,7 @@ def create_latex_table_test_times(df):
     }
     latex_table = (
         "\\begin{table}[ht]\n"
-        "\\caption{Durchschnittliche Laufzeit für die Clustering und Reward Varianten}\n"
+        "\\caption{Durchschnittliche Laufzeit für einen Produktionsplan im Test}\n"
         "\\centering\n"
         "\\label{tab:zeiten_testing}\n"
         "\\begin{tabular}{lccc}\n"
@@ -130,7 +130,64 @@ def create_latex_table_test_times(df):
         f.write(latex_table)
 
 
+def create_latex_table_test_times_ga(df, ga_time):
+    latex_table = (
+        "\\begin{table}[ht]\n"
+        "\\caption{Durchschnittliche Laufzeit für einen Produktionsplan im Test und Zeitersparnis relativ zum genetischen Algorithmus (GA)}\n"
+        "\\centering\n"
+        "\\label{tab:zeiten_testing}\n"
+        "\\begin{tabular}{lcccc}\n"
+        "\\hline\n"
+        "\\textbf{} & \\textbf{Kmeans} & \\textbf{Agglomerativ} & \\textbf{Ohne Cluster}  & \\textbf{GA} \\\\\n"
+        "\\hline\n"
+    )
+    
+    Kmeans_times = []
+    KNN_times = []
+    No_cluster_times = []
+    
+    for experiment_type in ['dense', 'sparse', 'sparse_sum']:
+        filtered_df = df[df['env'].str.contains(experiment_type)]
+        for cluster_size in [8, 12, 15]:
+            for cluster_method in ['kmeans', 'neighbour', 'no_cluster']:
+                env_name = f"3_{experiment_type}_{cluster_size}_{cluster_method}"
+                subset = filtered_df[filtered_df['env'] == env_name]
+                if not subset.empty:
+                    elapsed_time = subset['elapsed_time']._values[0]
+                    if cluster_method == 'kmeans':
+                        Kmeans_times.append(elapsed_time)
+                    elif cluster_method == 'neighbour':
+                        KNN_times.append(elapsed_time)
+                    elif cluster_method == 'no_cluster':
+                        No_cluster_times.append(elapsed_time)
 
+    latex_table += (
+        f"Laufzeit & "
+        f"{statistics.mean(Kmeans_times):.3f} [s] & "
+        f"{statistics.mean(KNN_times):.3f} [s] & "
+        f"{statistics.mean(No_cluster_times):.3f} [s] & "
+        f"{time_ga.iloc[0]:.3f} [s] \\\\\n"
+    )
+
+    Kmeans_ersparniss = ((time_ga-statistics.mean(Kmeans_times))/time_ga.iloc[0])*100
+    KNN_ersparniss = ((time_ga-statistics.mean(KNN_times))/time_ga.iloc[0])*100
+    Ohne_ersparniss = ((time_ga-statistics.mean(No_cluster_times))/time_ga.iloc[0])*100
+    latex_table += (
+        f"Zeitersparnis & "
+        f"{statistics.mean(Kmeans_ersparniss):.1f} \% & "
+        f"{statistics.mean(KNN_ersparniss):.1f} \% & "
+        f"{statistics.mean(Ohne_ersparniss):.1f} \% & "
+        f" \\\\\n"
+    )
+
+    
+    latex_table += (
+        "\\hline\n"
+        "\\end{tabular}\n"
+        "\\end{table}\n"
+    )
+    with open('isri_optimizer/rl_sequential_agent/plots/average_testing_times.tex', 'w', encoding='utf-8') as f:
+        f.write(latex_table)
 
 
 test_table = True
@@ -145,6 +202,16 @@ if test_table:
         f.write(latex_sparse)
         f.write("\n\n")
         f.write(latex_sparse_sum)
+
+times_table_test = True
+if times_table_test:
+    # times_df = grouped_df[['env', 'elapsed_time']]
+    df = pd.read_csv('time_ga.csv')
+    time_ga = df.mean()
+    create_latex_table_test_times_ga(grouped_df, time_ga)
+
+
+
 train_table = True
 if train_table:
     #base_directory = 'isri_optimizer/rl_sequential_agent/savefiles_Train1'
@@ -165,10 +232,4 @@ if train_table:
             f.write("\n\n")
 
 
-
-times_table_train = True
-if times_table_train:
-    times_df = grouped_df[['env', 'elapsed_time']]
-    create_latex_table_test_times(grouped_df)
-    
 

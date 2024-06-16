@@ -235,6 +235,8 @@ if plot_GA_solution:
     #                      'isri_optimizer/rl_sequential_agent/plots/data/', 'GA', 'Dringlichkeit')
     plot_relative_hist(data, np.amax(data)+1, 'Priorität nach Liefertermin', 'relative Häufigkeit', 'Auswahl der n dringendsten Aufträge bei dem genetischen Algorithmus', 
                           'isri_optimizer/rl_sequential_agent/plots/data/', 'GA', 'Dringlichkeit_relativ')
+    
+
 
 
 
