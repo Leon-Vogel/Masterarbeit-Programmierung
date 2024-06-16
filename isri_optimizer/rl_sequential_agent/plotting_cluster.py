@@ -123,7 +123,8 @@ def plot_relative_hist(all_labels, bins, xlabel, ylabel, title, file_path, file_
     plt.xticks(np.arange(1, bins+1, 1))  
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
-    #plt.title(title, fontsize=font_size)
+    if title is not None:
+        plt.title(title, fontsize=font_size)
     plt.subplots_adjust(left=0.15, bottom=0.15)
     if grid:
         ax = plt.gca()
@@ -170,12 +171,12 @@ def create_histogram_data_table(data, experiment_type, output_path):
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write(table)
 
-plot_cluster_metrics = True
+plot_cluster_metrics = False
 if plot_cluster_metrics:
     GA_SOLUTIONS_PATH = "./isri_optimizer/rl_sequential_agent/IsriDataset.pkl"
     df, df_cluster = load_isri_dataset_to_dataframe(GA_SOLUTIONS_PATH)
     K = range(2, 21)
-    Achsen = ['Distortion', 'Inertia', 'Silhouette Score', 'Davies Bouldin Score']
+    Achsen = ['Varianz innerhalb der Cluster', 'Inertia', 'Silhouettenkoeffizient', 'Davies-Bouldin Index']
     datei_endung = ['distortion', 'inertia', 'silhouette', 'davies_bouldin']
     Methoden = ['Kmeans', 'Agglomeratives']
     for Methode in Methoden:
@@ -207,10 +208,12 @@ if plot_cluster_count:
                     labels = model.predict(times_array)
                     all_labels.append(labels)
                 all_labels = np.array(all_labels).flatten()
-                plot_hist(all_labels, i, 'Klassen', 'Anzahl Produkte einer Klasse', f'Häufigkeit der Klassen für {Namen[counter]} Clustering', 
-                          'isri_optimizer/rl_sequential_agent/plots/data/count/', f'{Methode}_Count', f'n{i}')
+                #plot_hist(all_labels, i, 'Klassen', 'Anzahl Produkte einer Klasse', f'Häufigkeit der Klassen für {Namen[counter]} Clustering', 
+                #          'isri_optimizer/rl_sequential_agent/plots/data/count/', f'{Methode}_Count', f'n{i}')
+                plot_relative_hist(all_labels, i, 'Klassen', 'relative Häufigkeit', title=f'{Namen[counter]} Clustering', 
+                          file_path='isri_optimizer/rl_sequential_agent/plots/data/count/', file_name=f'{Namen[counter]}_Count', file_suffix=f'n{i}')
 
-plot_GA_solution = True
+plot_GA_solution = False
 if plot_GA_solution:
     GA_SOLUTIONS_PATH = "./isri_optimizer/rl_sequential_agent/IsriDataset.pkl"
     isri_dataset = pickle.load(open(GA_SOLUTIONS_PATH, 'rb'))
@@ -233,8 +236,8 @@ if plot_GA_solution:
     #create_histogram_data_table(data, 'den genetischen Algorithmus', 'isri_optimizer/rl_sequential_agent/plots/data/histogram_data.tex')
     #plot_hist(data, np.amax(data)+1, 'n dringendster Auftrag', 'Häufigkeit', 'Auswahl der n dringendsten Aufträge bei dem genetischen Algorithmus', 
     #                      'isri_optimizer/rl_sequential_agent/plots/data/', 'GA', 'Dringlichkeit')
-    plot_relative_hist(data, np.amax(data)+1, 'Priorität nach Liefertermin', 'relative Häufigkeit', 'Auswahl der n dringendsten Aufträge bei dem genetischen Algorithmus', 
-                          'isri_optimizer/rl_sequential_agent/plots/data/', 'GA', 'Dringlichkeit_relativ')
+    plot_relative_hist(data, np.amax(data)+1, 'Priorität nach Liefertermin', 'relative Häufigkeit', title=None, #'Auswahl der n dringendsten Aufträge bei dem genetischen Algorithmus'
+                          file_path='isri_optimizer/rl_sequential_agent/plots/data/', file_name='GA', file_suffix='Dringlichkeit_relativ')
     
 
 
