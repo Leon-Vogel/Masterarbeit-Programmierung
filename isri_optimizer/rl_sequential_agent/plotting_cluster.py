@@ -60,7 +60,7 @@ def plot_elbow_method(k_range, values, xlabel, ylabel, title, file_path, file_na
     plt.plot(k_range, values, 'bx-')
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
-    plt.title(title, fontsize=font_size, pad=10)
+    # plt.title(title, fontsize=font_size, pad=10)
     plt.xticks(range(min(k_range), max(k_range)+1, 2))
     plt.grid(True)
     plt.subplots_adjust(left=0.15, bottom=0.15)
@@ -170,7 +170,7 @@ def create_histogram_data_table(data, experiment_type, output_path):
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write(table)
 
-plot_cluster_metrics = False
+plot_cluster_metrics = True
 if plot_cluster_metrics:
     GA_SOLUTIONS_PATH = "./isri_optimizer/rl_sequential_agent/IsriDataset.pkl"
     df, df_cluster = load_isri_dataset_to_dataframe(GA_SOLUTIONS_PATH)
@@ -187,7 +187,7 @@ if plot_cluster_metrics:
             plot_elbow_method(K, data[i], 'Anzahl der Klassen', Achsen[i], Titel[i], 
                         'isri_optimizer/rl_sequential_agent/plots/data/', Methode, datei_endung[i])
 
-plot_cluster_count = False
+plot_cluster_count = True
 if plot_cluster_count:
     GA_SOLUTIONS_PATH = "./isri_optimizer/rl_sequential_agent/IsriDataset.pkl"
     path="./isri_optimizer/rl_sequential_agent/cluster_models/"

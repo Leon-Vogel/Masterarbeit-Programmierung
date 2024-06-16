@@ -21,7 +21,7 @@ def create_latex_table(df, experiment_type):
         f"\\caption{{Durchschnitt der Kennzahlen aus dem Test für {Rewards[experiment_type]}}}\n"
         "\\begin{tabular}{lccccc}\n"
         "\\hline\n"
-        "\\textbf{Experiment} & \\textbf{Return} & \\textbf{D. Gap} & \\textbf{W. Gap} & \\textbf{D. Return} & \\textbf{W. Return} \\\\\n"
+        "\\textbf{} & \\textbf{Return} & \\textbf{D. Gap} & \\textbf{W. Gap} & \\textbf{D. Return} & \\textbf{W. Return} \\\\\n"
         "\\hline\n"
     )
 
@@ -48,7 +48,7 @@ def create_latex_table_from_events(experiments, Rewards, Cluster):
             f"\\caption{{Durchschnitt der Kennzahlen aus den letzten 50 Trainingsiterationen für {Rewards[experiment_type]}}}\n"
             "\\begin{tabular}{lccccc}\n"
             "\\hline\n"
-            "\\textbf{Experiment} & \\textbf{Return} & \\textbf{D. Gap} & \\textbf{W. Gap} & \\textbf{D. Return} & \\textbf{W. Return} \\\\\n"
+            "\\textbf{} & \\textbf{Return} & \\textbf{D. Gap} & \\textbf{W. Gap} & \\textbf{D. Return} & \\textbf{W. Return} \\\\\n"
             "\\hline\n"
         )
 
