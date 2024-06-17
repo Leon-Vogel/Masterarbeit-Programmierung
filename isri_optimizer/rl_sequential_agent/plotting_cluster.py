@@ -90,11 +90,15 @@ def plot_elbow_method_multi(x_data_list, y_data_list, titles, sup_title, x_label
         ax.set_xscale(x_scale)
         ax.set_yscale(y_scale)
         ax.grid(True)
+        #ax.set_xticks(range(min(x_data), max(x_data)+1))
         ax.set_xticks(range(min(x_data), max(x_data)+1, 2))
         if show_titles:
             ax.set_title(title, fontsize=font_size)
         ax.set_ylabel(y_label, fontsize=font_size)
         ax.plot(x_data, y_data, 'b-')
+        #for n, label in enumerate(ax.xaxis.get_ticklabels()):
+        #    if n % 2 != 0:
+        #        label.set_visible(False)
     for ax in axs[1,:]:
         ax.set_xlabel(x_label, fontsize=font_size)
     if show_sup_title:
@@ -239,7 +243,7 @@ def create_histogram_data_table(data, experiment_type, output_path):
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write(table)
 
-plot_cluster_metrics = False
+plot_cluster_metrics = True
 if plot_cluster_metrics:
     GA_SOLUTIONS_PATH = "./isri_optimizer/rl_sequential_agent/IsriDataset.pkl"
     df, df_cluster = load_isri_dataset_to_dataframe(GA_SOLUTIONS_PATH)
@@ -257,12 +261,12 @@ if plot_cluster_metrics:
         for i in range(len(data)):
             plot_elbow_method(K, data[i], 'Anzahl der Klassen', Achsen[i], Titel[i], 
                         'isri_optimizer/rl_sequential_agent/plots/data/', Methode, datei_endung[i])
-    titel_multi = ['Kmeans', 'Kmeans', 'Agglomerativ', 'Agglomerativ']
+    titel_multi = ['Kmeans Clustering', 'Kmeans Clustering', 'Agglomeratives Clustering', 'Agglomeratives Clustering']
     plot_elbow_method_multi([K, K, K, K], [kmeans_data[0], kmeans_data[2], data[0], data[2]], 
                             titles=titel_multi, sup_title=None, 
                             x_label='Anzahl der Klassen', y_labels=['Varianz innerhalb der Cluster', 'Silhouettenkoeffizient', 'Varianz innerhalb der Cluster', 'Silhouettenkoeffizient'],
                             file_path='isri_optimizer/rl_sequential_agent/plots/data/', file_name='Cluster_Kennzahlen_Multiplot', 
-                            file_suffix='2x2', show_sup_title=False, show_titles=True
+                            file_suffix='2x2_wenigerLinien', show_sup_title=False, show_titles=True
     )
 
 plot_cluster_count = False
@@ -290,7 +294,7 @@ if plot_cluster_count:
                 plot_relative_hist(all_labels, i, 'Klassen', 'relative Häufigkeit', title=f'{Namen[counter]} Clustering', 
                           file_path='isri_optimizer/rl_sequential_agent/plots/data/count/', file_name=f'{Namen[counter]}_Count', file_suffix=f'n{i}')
 
-plot_cluster_count_3x2 = True
+plot_cluster_count_3x2 = False
 if plot_cluster_count_3x2:
     GA_SOLUTIONS_PATH = "./isri_optimizer/rl_sequential_agent/IsriDataset.pkl"
     path="./isri_optimizer/rl_sequential_agent/cluster_models/"
