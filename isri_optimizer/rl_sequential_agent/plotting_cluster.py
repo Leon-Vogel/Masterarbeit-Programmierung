@@ -249,7 +249,7 @@ def create_histogram_data_table(data, experiment_type, output_path):
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write(table)
 
-plot_cluster_metrics = True
+plot_cluster_metrics = False
 if plot_cluster_metrics:
     GA_SOLUTIONS_PATH = "./isri_optimizer/rl_sequential_agent/IsriDataset.pkl"
     df, df_cluster = load_isri_dataset_to_dataframe(GA_SOLUTIONS_PATH)
@@ -344,7 +344,7 @@ if plot_cluster_count_3x2:
     plt.close()
 
 
-plot_GA_solution = False
+plot_GA_solution = True
 if plot_GA_solution:
     GA_SOLUTIONS_PATH = "./isri_optimizer/rl_sequential_agent/IsriDataset.pkl"
     isri_dataset = pickle.load(open(GA_SOLUTIONS_PATH, 'rb'))
@@ -367,7 +367,7 @@ if plot_GA_solution:
     #create_histogram_data_table(data, 'den genetischen Algorithmus', 'isri_optimizer/rl_sequential_agent/plots/data/histogram_data.tex')
     #plot_hist(data, np.amax(data)+1, 'n dringendster Auftrag', 'Häufigkeit', 'Auswahl der n dringendsten Aufträge bei dem genetischen Algorithmus', 
     #                      'isri_optimizer/rl_sequential_agent/plots/data/', 'GA', 'Dringlichkeit')
-    plot_relative_hist(data, np.amax(data)+1, 'Priorität nach Liefertermin', 'relative Häufigkeit', title=None, #'Auswahl der n dringendsten Aufträge bei dem genetischen Algorithmus'
+    plot_relative_hist(data, np.amax(data)+1, 'Priorität nach Deadline', 'relative Häufigkeit', title=None, #'Auswahl der n dringendsten Aufträge bei dem genetischen Algorithmus'
                           file_path='isri_optimizer/rl_sequential_agent/plots/data/', file_name='GA', file_suffix='Dringlichkeit_relativ')
     
 
