@@ -402,7 +402,7 @@ class IsriEnv(gym.Env):
         fortschritt: step/n_products - Prozentueller Fortschritt
         last_n_features: für die letzten n Produkte welche Aufwände + Deadline verplant wurden
         """
-        #Deadline etc. für leere Klassen ist -1, 
+        #Deadline etc. für leere Klassen ist 0, 
         obs = np.zeros((self.n_classes, 14))#*-1 # 14 = 1 deadline + 1 Anzahl + 12 Aufwände next
         for cls in range(self.n_classes):
             class_products = self.jobclasses[cls]

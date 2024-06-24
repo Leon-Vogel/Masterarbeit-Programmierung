@@ -5,7 +5,7 @@ from tensorboard.backend.event_processing.event_accumulator import EventAccumula
 from tensorflow.python.summary.summary_iterator import summary_iterator
 from plotting_funktion import ergebnisse_plot, read_tensorflow_events, find_event_files_dict, ergebnisse_subplot, ergebnisse_subplot_2x2
 
-names = ['Kmeans', 'Agglomerativ', 'Ohne Cluster']
+names = ['k-Means', 'Agglomerativ', 'Ohne Cluster']
 num_dict = {
     '_8': 'acht',
     '_12': 'zwölf',
@@ -31,13 +31,13 @@ results_times = []
 normale_plots = False
 explained_variance = False
 subplots = False
-subplots_4 = False
+subplots_4 = True
 for reward, values in Experimente.items():
     print(reward)
     for klassen, path in values.items():
         print(klassen)
         data = read_tensorflow_events(Experimente, reward, klassen)
-        zeit_erfassen = True
+        zeit_erfassen = False
         if zeit_erfassen:
             name = 0
             for i, total_time in enumerate(data['total_time']):
@@ -103,7 +103,7 @@ for reward, values in Experimente.items():
                 ]
                 y_labels = ["Return", "Auslastung reltaiv zum GA", "Termintreue relativ zum GA", "Explained Variance"]
                 ergebnisse_subplot_2x2([data['x_rew'], data['x_diff'], data['x_tard'], data['x_expl_var']], [data['y_rew'], data['y_diff'], data['y_tard'], data['y_expl_var']], 
-                                    titles=titles, show_titles=False, show_sup_title=False, sup_title=f'Ergebnisse bei {num_dict[klassen]} Aktionen', x_label="Trainings-Iterationen", 
+                                    titles=titles, show_titles=False, show_sup_title=False, sup_title=f'Ergebnisse bei {num_dict[klassen]} Aktionen', x_label="Trainingsiteration", 
                                     y_labels=y_labels, labels=names, moving_average=True, 
                                     ma_interval=fenster, line_styles=linestyle, colors=colors, y_low=None, y_high=None, leg_pos='lower right', 
                                     file_path=f'isri_optimizer/rl_sequential_agent/plots/{reward}/{reward}', file_name=f'_subplots4_{klassen}'
@@ -116,7 +116,7 @@ if zeit_erfassen:
     df = pd.DataFrame(results_times)
     mean_times = df.groupby(['reward', 'cluster_method'])['total_time'].mean().unstack()
     mean_times = mean_times / 60.0  
-    mean_times = mean_times[['Kmeans', 'Agglomerativ', 'Ohne Cluster']] 
+    mean_times = mean_times[['k-Means', 'Agglomerativ', 'Ohne Cluster']] 
     overall_mean_times = mean_times.mean()
     latex_table = (
         "\\begin{table}[ht]\n"

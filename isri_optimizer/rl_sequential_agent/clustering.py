@@ -88,7 +88,7 @@ class cluster_neighbour():
             y_means = agglo_model.fit_predict(df)
 
             #df.insert(0, "label", y_means, True)
-            self.knn_model = KNeighborsRegressor(n_neighbors=1)
+            self.knn_model = KNeighborsRegressor(n_neighbors=1) #TODO: Regressor durch Classifier austauschen
             self.knn_model.fit(df, y_means)
             with open(path+"knn_model_n"+str(n_cluster)+".pkl", "wb") as f:
                 pickle.dump(self.knn_model, f)

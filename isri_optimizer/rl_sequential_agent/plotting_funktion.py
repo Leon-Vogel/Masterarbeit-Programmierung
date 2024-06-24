@@ -170,8 +170,9 @@ def ergebnisse_subplot_2x2(x_data_list, y_data_list, titles, sup_title, x_label,
     })
 
     fig, axs = plt.subplots(2, 2, figsize=figsize)
+    subplot_labels = ['a)', 'b)', 'c)', 'd)']
 
-    for plot_n, (ax, x_data, y_data, title, y_label) in enumerate(zip(axs.flatten(), x_data_list, y_data_list, titles, y_labels), start=1):
+    for plot_n, (ax, x_data, y_data, title, y_label, subplot_label) in enumerate(zip(axs.flatten(), x_data_list, y_data_list, titles, y_labels, subplot_labels), start=1):
         ax.set_xscale(x_scale)
         ax.set_yscale(y_scale)
         ax.grid(True)
@@ -185,6 +186,7 @@ def ergebnisse_subplot_2x2(x_data_list, y_data_list, titles, sup_title, x_label,
             ax.set_title(title, fontsize=font_size)
         ax.set_ylabel(y_label, fontsize=font_size)
         
+        ax.text(-0.2, -0.1, subplot_label, transform=ax.transAxes, fontsize=font_size, verticalalignment='bottom', horizontalalignment='left')
 
         if line_styles is None:
             line_styles = ['-'] * len(x_data)

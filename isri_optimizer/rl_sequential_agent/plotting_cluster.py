@@ -20,6 +20,8 @@ def load_isri_dataset_to_dataframe(path):
     return df, df_cluster
 
 def cluster_size_metrics(df_cluster, k_range, cluster):
+    if cluster == 'k-Means':
+        cluster = 'Kmeans'
     distortions = []
     inertias = []
     silhouette = []
@@ -85,20 +87,24 @@ def plot_elbow_method_multi(x_data_list, y_data_list, titles, sup_title, x_label
         'ytick.labelsize': font_size,
         'font.family': 'Times New Roman'
     })
+    
+    subplot_labels = ['a)', 'b)', 'c)', 'd)']
     fig, axs = plt.subplots(2, 2, figsize=figsize)
-    for plot_n, (ax, x_data, y_data, title, y_label) in enumerate(zip(axs.flatten(), x_data_list, y_data_list, titles, y_labels), start=1):
+    for plot_n, (ax, x_data, y_data, title, y_label, subplot_label) in enumerate(zip(axs.flatten(), x_data_list, y_data_list, titles, y_labels, subplot_labels), start=1):
         ax.set_xscale(x_scale)
         ax.set_yscale(y_scale)
         ax.grid(True)
-        #ax.set_xticks(range(min(x_data), max(x_data)+1))
-        ax.set_xticks(range(min(x_data), max(x_data)+1, 2))
+        ax.set_xticks(range(min(x_data), max(x_data)+1))
+        #ax.set_xticks(range(min(x_data), max(x_data)+1, 2))
         if show_titles:
             ax.set_title(title, fontsize=font_size)
         ax.set_ylabel(y_label, fontsize=font_size)
+        ax.text(-0.2, -0.1, subplot_label, transform=ax.transAxes, fontsize=font_size, verticalalignment='bottom', horizontalalignment='left')
+
         ax.plot(x_data, y_data, 'b-')
-        #for n, label in enumerate(ax.xaxis.get_ticklabels()):
-        #    if n % 2 != 0:
-        #        label.set_visible(False)
+        for n, label in enumerate(ax.xaxis.get_ticklabels()):
+            if n % 2 != 0:
+                label.set_visible(False)
     for ax in axs[1,:]:
         ax.set_xlabel(x_label, fontsize=font_size)
     if show_sup_title:
@@ -250,23 +256,23 @@ if plot_cluster_metrics:
     K = range(2, 21)
     Achsen = ['Varianz innerhalb der Cluster', 'Inertia', 'Silhouettenkoeffizient', 'Davies-Bouldin Index']
     datei_endung = ['distortion', 'inertia', 'silhouette', 'davies_bouldin']
-    Methoden = ['Kmeans', 'Agglomeratives']
+    Methoden = ['k-Means', 'Agglomeratives']
     for Methode in Methoden:
         distortions, inertias, silhouette, davies_bouldin = cluster_size_metrics(df_cluster, K, Methode)
         data = [distortions, inertias, silhouette, davies_bouldin]
-        if Methode == 'Kmeans':
+        if Methode == 'k-Means':
             kmeans_data = data
         Titel = [f'Die Ellenbogen-Methode mit Distortion für {Methode} Clustering', f'Die Ellenbogen-Methode mit Inertia für {Methode} Clustering', 
             f'Der Silhouette Score für {Methode} Clustering', f'Der Davies Bouldin Score für {Methode} Clustering']
         for i in range(len(data)):
             plot_elbow_method(K, data[i], 'Anzahl der Klassen', Achsen[i], Titel[i], 
                         'isri_optimizer/rl_sequential_agent/plots/data/', Methode, datei_endung[i])
-    titel_multi = ['Kmeans Clustering', 'Kmeans Clustering', 'Agglomeratives Clustering', 'Agglomeratives Clustering']
+    titel_multi = ['k-Means Clustering', 'k-Means Clustering', 'Agglomeratives Clustering', 'Agglomeratives Clustering']
     plot_elbow_method_multi([K, K, K, K], [kmeans_data[0], kmeans_data[2], data[0], data[2]], 
                             titles=titel_multi, sup_title=None, 
                             x_label='Anzahl der Klassen', y_labels=['Varianz innerhalb der Cluster', 'Silhouettenkoeffizient', 'Varianz innerhalb der Cluster', 'Silhouettenkoeffizient'],
                             file_path='isri_optimizer/rl_sequential_agent/plots/data/', file_name='Cluster_Kennzahlen_Multiplot', 
-                            file_suffix='2x2_wenigerLinien', show_sup_title=False, show_titles=True
+                            file_suffix='2x2', show_sup_title=False, show_titles=True
     )
 
 plot_cluster_count = False
@@ -301,7 +307,7 @@ if plot_cluster_count_3x2:
     n_cluster = [8, 12, 15]
     isri_dataset = pickle.load(open(GA_SOLUTIONS_PATH, 'rb'))
     Methoden = ['kmeans', 'knn']
-    Namen = ['Kmeans', 'Agglomeratives']
+    Namen = ['k-Means', 'Agglomeratives']
     plt.rcParams.update({
         'font.size': 8,
         'legend.fontsize': 8,
@@ -309,7 +315,7 @@ if plot_cluster_count_3x2:
         'ytick.labelsize': 8,
         'font.family': 'Times New Roman'
     })
-    fig, axs = plt.subplots(len(n_cluster), len(Methoden), figsize=(4.5, 6))
+    fig, axs = plt.subplots(len(n_cluster), len(Methoden), figsize=(4.5, 5.5))
     #fig.subplots_adjust(hspace=0.4, wspace=0.4)
     
     for row, i in enumerate(n_cluster):
@@ -328,7 +334,7 @@ if plot_cluster_count_3x2:
                 if row == 0:
                     plot_relative_hist_3x2(ax, all_labels, i, '', 'relative Häufigkeit', title=f'{Namen[col]} Clustering')
                 elif row == 2:
-                    plot_relative_hist_3x2(ax, all_labels, i, 'Klassen', 'relative Häufigkeit', title='', every_nth=2)
+                    plot_relative_hist_3x2(ax, all_labels, i, 'Klasse', 'relative Häufigkeit', title='', every_nth=2)
                 else:
                     plot_relative_hist_3x2(ax, all_labels, i, '', 'relative Häufigkeit', title='')
     plt.tight_layout()
