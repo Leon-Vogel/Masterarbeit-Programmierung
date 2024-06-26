@@ -300,7 +300,7 @@ if plot_cluster_count:
                 plot_relative_hist(all_labels, i, 'Klassen', 'relative Häufigkeit', title=f'{Namen[counter]} Clustering', 
                           file_path='isri_optimizer/rl_sequential_agent/plots/data/count/', file_name=f'{Namen[counter]}_Count', file_suffix=f'n{i}')
 
-plot_cluster_count_3x2 = False
+plot_cluster_count_3x2 = True
 if plot_cluster_count_3x2:
     GA_SOLUTIONS_PATH = "./isri_optimizer/rl_sequential_agent/IsriDataset.pkl"
     path="./isri_optimizer/rl_sequential_agent/cluster_models/"
@@ -315,7 +315,7 @@ if plot_cluster_count_3x2:
         'ytick.labelsize': 8,
         'font.family': 'Times New Roman'
     })
-    fig, axs = plt.subplots(len(n_cluster), len(Methoden), figsize=(4.5, 5.5))
+    fig, axs = plt.subplots(len(n_cluster), len(Methoden), figsize=(4.5, 5.0))
     #fig.subplots_adjust(hspace=0.4, wspace=0.4)
     
     for row, i in enumerate(n_cluster):
@@ -344,7 +344,7 @@ if plot_cluster_count_3x2:
     plt.close()
 
 
-plot_GA_solution = True
+plot_GA_solution = False
 if plot_GA_solution:
     GA_SOLUTIONS_PATH = "./isri_optimizer/rl_sequential_agent/IsriDataset.pkl"
     isri_dataset = pickle.load(open(GA_SOLUTIONS_PATH, 'rb'))

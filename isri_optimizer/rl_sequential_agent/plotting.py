@@ -101,7 +101,7 @@ for reward, values in Experimente.items():
                     'Vergleich der Terminabweichung',
                     'Explained Variance'
                 ]
-                y_labels = ["Return", "Belastung relativ zum GA", "Terminabweichung relativ zum GA", "Explained Variance"]
+                y_labels = ["Return", "Belastung relativ zum GA", "Verspätung relativ zum GA", "Explained Variance"]
                 ergebnisse_subplot_2x2([data['x_rew'], data['x_diff'], data['x_tard'], data['x_expl_var']], [data['y_rew'], data['y_diff'], data['y_tard'], data['y_expl_var']], 
                                     titles=titles, show_titles=False, show_sup_title=False, sup_title=f'Ergebnisse bei {num_dict[klassen]} Aktionen', x_label="Trainingsiteration", 
                                     y_labels=y_labels, labels=names, moving_average=True, 
